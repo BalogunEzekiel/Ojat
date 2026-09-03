@@ -1,21 +1,155 @@
 services:
+
+  # =========================================================
+  # OJAT API
+  # =========================================================
   - type: web
     name: ojat-api
-    env: node
+    runtime: node
     rootDir: server
+
     buildCommand: npm install && npx prisma generate
+
     startCommand: npm start
+
     healthCheckPath: /health
+
     envVars:
       - key: NODE_ENV
         value: production
+
       - key: DATABASE_URL
         sync: false
-      - key: JWT_ACCESS_SECRET
-        generateValue: true
-      - key: JWT_REFRESH_SECRET
-        generateValue: true
+
       - key: REDIS_URL
         sync: false
+
       - key: CLIENT_URL
+        sync: false
+
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+      - key: GROQ_API_KEY_1
+        sync: false
+
+      - key: GROQ_API_KEY_2
+        sync: false
+
+      - key: GROQ_BASE_URL
+        sync: false
+
+      - key: GROQ_MODEL_NAME
+        sync: false
+
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+
+      - key: WHATSAPP_BUSINESS_ACCOUNT_ID
+        sync: false
+
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+
+      - key: META_APP_ID
+        sync: false
+
+      - key: META_APP_SECRET
+        sync: false
+
+      - key: META_GRAPH_VERSION
+        sync: false
+
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+
+      - key: CLOUDINARY_API_KEY
+        sync: false
+
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+
+  # =========================================================
+  # OJAT WHATSAPP / BULLMQ WORKER
+  # =========================================================
+  - type: worker
+    name: ojat-worker
+    runtime: node
+    rootDir: server
+
+    buildCommand: npm install && npx prisma generate
+
+    startCommand: node src/workers/whatsapp.worker.js
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: DATABASE_URL
+        sync: false
+
+      - key: REDIS_URL
+        sync: false
+
+      - key: GROQ_API_KEY_1
+        sync: false
+
+      - key: GROQ_API_KEY_2
+        sync: false
+
+      - key: GROQ_BASE_URL
+        sync: false
+
+      - key: GROQ_MODEL_NAME
+        sync: false
+
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+
+      - key: WHATSAPP_BUSINESS_ACCOUNT_ID
+        sync: false
+
+      - key: META_APP_ID
+        sync: false
+
+      - key: META_APP_SECRET
+        sync: false
+
+      - key: META_GRAPH_VERSION
+        sync: false
+
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+
+      - key: CLOUDINARY_API_KEY
+        sync: false
+
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+
+  # =========================================================
+  # OJAT CLIENT
+  # =========================================================
+  - type: web
+    name: ojat-client
+    runtime: static
+    rootDir: client
+
+    buildCommand: npm install && npm run build
+
+    staticPublishPath: dist
+
+    envVars:
+      - key: VITE_API_URL
         sync: false
