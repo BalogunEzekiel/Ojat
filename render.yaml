@@ -1,7 +1,7 @@
 services:
 
   # ==========================================
-  # BACKEND
+  # OJAT API
   # ==========================================
 
   - type: web
@@ -79,6 +79,45 @@ services:
 
       - key: CLOUDINARY_FOLDER
         value: ojat-prod
+
+
+  # ==========================================
+  # WHATSAPP WORKER
+  # ==========================================
+
+  - type: worker
+    name: ojat-whatsapp-worker
+    runtime: node
+    rootDir: server
+
+    buildCommand: |
+      npm install
+      npx prisma generate
+
+    startCommand: node src/workers/whatsapp.worker.js
+
+    envVars:
+
+      - key: NODE_ENV
+        value: production
+
+      - key: DATABASE_URL
+        sync: false
+
+      - key: REDIS_URL
+        sync: false
+
+      - key: GROQ_API_KEY_1
+        sync: false
+
+      - key: GROQ_API_KEY_2
+        sync: false
+
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
 
 
   # ==========================================
