@@ -1,6 +1,7 @@
 services:
+
   # ==========================================
-  # OJAT BACKEND API
+  # BACKEND
   # ==========================================
 
   - type: web
@@ -18,6 +19,7 @@ services:
     healthCheckPath: /health
 
     envVars:
+
       - key: NODE_ENV
         value: production
 
@@ -36,10 +38,6 @@ services:
       - key: CLIENT_URL
         sync: false
 
-      # ======================================
-      # GROQ
-      # ======================================
-
       - key: GROQ_API_KEY_1
         sync: false
 
@@ -51,10 +49,6 @@ services:
 
       - key: GROQ_MODEL_NAME
         value: openai/gpt-oss-120b
-
-      # ======================================
-      # META WHATSAPP
-      # ======================================
 
       - key: WHATSAPP_VERIFY_TOKEN
         sync: false
@@ -68,19 +62,11 @@ services:
       - key: WHATSAPP_APP_SECRET
         sync: false
 
-      # ======================================
-      # PAYSTACK
-      # ======================================
-
       - key: PAYSTACK_SECRET_KEY
         sync: false
 
       - key: PAYSTACK_PUBLIC_KEY
         sync: false
-
-      # ======================================
-      # CLOUDINARY
-      # ======================================
 
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
@@ -93,3 +79,17 @@ services:
 
       - key: CLOUDINARY_FOLDER
         value: ojat-prod
+
+
+  # ==========================================
+  # FRONTEND
+  # ==========================================
+
+  - type: web
+    name: ojat-web
+    runtime: static
+    rootDir: client
+
+    buildCommand: npm install && npm run build
+
+    staticPublishPath: dist
