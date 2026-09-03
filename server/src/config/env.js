@@ -45,7 +45,7 @@ export const env = {
     "redis://127.0.0.1:6379",
 
   whatsappGraphVersion:
-    process.env.WHATSAPP_GRAPH_VERSION || "v22.0",
+    process.env.WHATSAPP_GRAPH_VERSION || "v26.0",
 
   whatsappMediaDir:
     process.env.WHATSAPP_MEDIA_DIR ||
