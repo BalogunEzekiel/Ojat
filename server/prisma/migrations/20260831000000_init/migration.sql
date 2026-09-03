@@ -1,0 +1,3 @@
+-- Production baseline migration
+-- Generate against your target PostgreSQL using: npx prisma migrate dev --name init
+-- This repository ships schema-first to avoid embedding provider-specific generated SQL from an untested environment.

@@ -1,0 +1,3 @@
+import axios from 'axios'; import { env } from '../config/env.js';
+export async function initializePaystack({email,amount,reference,metadata}){if(!env.paystackSecret) throw Object.assign(new Error('Paystack not configured'),{status:503});const {data}=await axios.post('https://api.paystack.co/transaction/initialize',{email,amount:Math.round(Number(amount)*100),reference,metadata},{headers:{Authorization:`Bearer ${env.paystackSecret}`}});if(!data.status)throw new Error(data.message);return data.data}
+export async function verifyPaystack(reference){const {data}=await axios.get(`https://api.paystack.co/transaction/verify/${reference}`,{headers:{Authorization:`Bearer ${env.paystackSecret}`}});return data.data}

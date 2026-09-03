@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: ojat-api
+    env: node
+    rootDir: server
+    buildCommand: npm install && npx prisma generate
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: REDIS_URL
+        sync: false
+      - key: CLIENT_URL
+        sync: false

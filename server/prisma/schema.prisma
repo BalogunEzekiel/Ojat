@@ -1,0 +1,493 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PLATFORM_ADMIN
+  BUSINESS_OWNER
+  BUSINESS_MANAGER
+  SALES_STAFF
+  INVENTORY_MANAGER
+  FINANCE_OFFICER
+  ANALYST
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageType {
+  TEXT
+  AUDIO
+  IMAGE
+  DOCUMENT
+  INTERACTIVE
+  SYSTEM
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  ABANDONED
+  REFUNDED
+}
+
+enum InventoryMovementType {
+  STOCK_IN
+  STOCK_OUT
+  ADJUSTMENT
+  RESERVATION
+  RELEASE
+}
+
+enum AgentStatus {
+  PROPOSED
+  VALIDATED
+  EXECUTED
+  FAILED
+  REQUIRES_APPROVAL
+}
+
+enum AIOrderProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+  PROCESSING
+  COMPLETED
+}
+
+model User {
+  id            String           @id @default(cuid())
+  email         String           @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  role          UserRole         @default(BUSINESS_OWNER)
+  memberships   BusinessMember[]
+  refreshTokens RefreshToken[]
+  reviewedAIOrderProposals AIOrderProposal[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Business {
+  id       String @id @default(cuid())
+  name     String
+  slug     String @unique
+  currency String @default("NGN")
+
+  members               BusinessMember[]
+  customers             Customer[]
+  products              Product[]
+  conversations         Conversation[]
+  orders                Order[]
+  invoices              Invoice[]
+  payments              Payment[]
+  inventories           Inventory[]
+  inventoryTransactions InventoryTransaction[]
+  whatsappAccounts      WhatsAppAccount[]
+  aiExtractions         AIExtraction[]
+  agentExecutions       AgentExecution[]
+  auditLogs             AuditLog[]
+  aiOrderProposals     AIOrderProposal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BusinessMember {
+  id         String   @id @default(cuid())
+  businessId String
+  userId     String
+  role       UserRole @default(BUSINESS_OWNER)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, userId])
+  @@index([userId])
+}
+
+model Customer {
+  id         String  @id @default(cuid())
+  businessId String
+  name       String?
+  phone      String
+  email      String?
+  notes      String?
+
+  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+  orders        Order[]
+  invoices      Invoice[]
+  aiOrderProposals AIOrderProposal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([businessId, phone])
+  @@index([businessId, phone])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  businessId  String
+  categoryId  String?
+  name        String
+  description String?
+  sku         String
+
+  sellingPrice Decimal  @db.Decimal(14, 2)
+  costPrice    Decimal? @db.Decimal(14, 2)
+  minStock     Int      @default(0)
+  active       Boolean  @default(true)
+
+  business              Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category              Category?              @relation(fields: [categoryId], references: [id])
+  variants              ProductVariant[]
+  inventory             Inventory?
+  inventoryTransactions InventoryTransaction[]
+  orderItems            OrderItem[]
+  aiOrderProposals      AIOrderProposal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([businessId, sku])
+  @@index([businessId, name])
+  @@index([categoryId])
+}
+
+model ProductVariant {
+  id         String   @id @default(cuid())
+  productId  String
+  name       String
+  sku        String?
+  attributes Json?
+  price      Decimal? @db.Decimal(14, 2)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model Inventory {
+  id         String @id @default(cuid())
+  businessId String
+  productId  String @unique
+  quantity   Int    @default(0)
+  reserved   Int    @default(0)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model InventoryTransaction {
+  id         String                @id @default(cuid())
+  businessId String
+  productId  String
+  type       InventoryMovementType
+  quantity   Int
+  reference  String?
+  note       String?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([businessId, productId])
+  @@index([productId])
+}
+
+model WhatsAppAccount {
+  id            String  @id @default(cuid())
+  businessId    String
+  phoneNumberId String  @unique
+  displayPhone  String?
+  active        Boolean @default(true)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model Conversation {
+  id         String  @id @default(cuid())
+  businessId String
+  customerId String?
+  externalId String?
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customerId], references: [id])
+  messages Message[]
+  aiOrderProposals AIOrderProposal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId, externalId])
+  @@index([customerId])
+}
+
+model Message {
+  id             String           @id @default(cuid())
+  conversationId String
+  externalId     String?          @unique
+  direction      MessageDirection
+  type           MessageType
+  content        String?
+  mediaUrl       String?
+  transcription  String?
+  rawPayload     Json?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  businessId String
+  customerId String
+  number     String
+  status     OrderStatus @default(PENDING)
+
+  subtotal    Decimal @db.Decimal(14, 2)
+  discount    Decimal @default(0) @db.Decimal(14, 2)
+  deliveryFee Decimal @default(0) @db.Decimal(14, 2)
+  total       Decimal @db.Decimal(14, 2)
+
+  deliveryAddress String?
+
+  items    OrderItem[]
+  business Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer    @relation(fields: [customerId], references: [id])
+  invoice  Invoice?
+  proposal AIOrderProposal?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([businessId, number])
+  @@index([businessId, status])
+  @@index([customerId])
+}
+
+model AIOrderProposal {
+  id                       String                @id @default(cuid())
+  businessId               String
+  customerId               String
+  conversationId           String?
+  orderId                  String                @unique
+  matchedProductId         String
+  status                   AIOrderProposalStatus @default(PENDING)
+  rawMessage               String
+  extractedIntent          String
+  aiConfidence             Float
+  customerMatchConfidence  Float?
+  productMatchConfidence   Float?
+  requestedQuantity        Int
+  availableInventory       Int
+  proposedUnitPrice        Decimal               @db.Decimal(14, 2)
+  proposedTotal            Decimal               @db.Decimal(14, 2)
+  createdAt                DateTime              @default(now())
+  reviewedAt               DateTime?
+  reviewedById             String?
+  rejectionReason          String?
+
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  matchedProduct Product       @relation(fields: [matchedProductId], references: [id])
+  reviewedBy     User?         @relation(fields: [reviewedById], references: [id])
+
+  @@index([businessId, status, createdAt])
+  @@index([customerId])
+  @@index([matchedProductId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(14, 2)
+  total     Decimal @db.Decimal(14, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Invoice {
+  id         String        @id @default(cuid())
+  businessId String
+  customerId String
+  orderId    String        @unique
+  number     String
+  status     InvoiceStatus @default(SENT)
+  total      Decimal       @db.Decimal(14, 2)
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer  @relation(fields: [customerId], references: [id])
+  order    Order     @relation(fields: [orderId], references: [id])
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([businessId, number])
+  @@index([businessId, status])
+  @@index([customerId])
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  businessId       String
+  invoiceId        String
+  provider         String
+  reference        String        @unique
+  amount           Decimal       @db.Decimal(14, 2)
+  status           PaymentStatus @default(PENDING)
+  authorizationUrl String?
+  rawPayload       Json?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invoice  Invoice  @relation(fields: [invoiceId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([businessId, status])
+  @@index([invoiceId])
+}
+
+model AIExtraction {
+  id         String  @id @default(cuid())
+  businessId String
+  messageId  String?
+  intent     String
+  confidence Float
+  extracted  Json
+  model      String?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([businessId])
+  @@index([messageId])
+}
+
+model AgentExecution {
+  id         String      @id @default(cuid())
+  businessId String
+  status     AgentStatus @default(PROPOSED)
+  action     String
+  input      Json?
+  output     Json?
+  error      String?
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([businessId, status])
+}
+
+model WebhookEvent {
+  id        String  @id @default(cuid())
+  provider  String
+  eventId   String  @unique
+  payload   Json
+  processed Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([provider])
+  @@index([processed])
+}
+
+model AuditLog {
+  id         String  @id @default(cuid())
+  businessId String?
+  actorId    String?
+  action     String
+  resource   String
+  resourceId String?
+  before     Json?
+  after      Json?
+
+  business Business? @relation(fields: [businessId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([businessId, createdAt])
+  @@index([actorId])
+  @@index([resource, resourceId])
+}

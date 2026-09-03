@@ -1,0 +1,3 @@
+import { Router } from 'express'; import { z } from 'zod'; import * as svc from '../services/auth.service.js'; import { ok,fail } from '../lib/response.js';
+const r=Router(); const reg=z.object({email:z.string().email(),password:z.string().min(8),firstName:z.string().optional(),lastName:z.string().optional(),businessName:z.string().min(2)});
+r.post('/register',async(req,res,next)=>{try{ok(res,await svc.register(reg.parse(req.body)),'Registered',201)}catch(e){next(e)}});r.post('/login',async(req,res,next)=>{try{const b=z.object({email:z.string().email(),password:z.string().min(1)}).parse(req.body);ok(res,await svc.login(b.email,b.password),'Logged in')}catch(e){next(e)}});export default r;
