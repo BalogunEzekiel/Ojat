@@ -4,7 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
-  Link,
+  NavLink,
   useNavigate,
 } from "react-router-dom";
 
@@ -182,33 +182,33 @@ function Layout({ children }) {
 
           <nav className="sidebar-nav">
 
-            <Link
+            <NavLink
               to="/dashboard"
               onClick={closeSidebar}
             >
               Dashboard
-            </Link>
+            </NavLink>
 
-            <Link
+            <NavLink
               to="/ai-orders"
               onClick={closeSidebar}
             >
               AI Orders
-            </Link>
+            </NavLink>
 
-            <Link
+            <NavLink
               to="/products"
               onClick={closeSidebar}
             >
               Products
-            </Link>
+            </NavLink>
 
-            <Link
+            <NavLink
               to="/ai"
               onClick={closeSidebar}
             >
               AI Extractor
-            </Link>
+            </NavLink>
 
           </nav>
 
