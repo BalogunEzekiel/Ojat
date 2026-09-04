@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Routes,
   Route,
@@ -9,7 +9,6 @@ import {
 
 import api from "./lib/api";
 
-
 /* =========================================================
    LOGIN
 ========================================================= */
@@ -17,18 +16,10 @@ import api from "./lib/api";
 function Login() {
   const nav = useNavigate();
 
-  const [email, setEmail] =
-    useState("admin@ojat.local");
-
-  const [password, setPassword] =
-    useState("ChangeMe123!");
-
-  const [error, setError] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
+  const [email, setEmail] = useState("admin@ojat.local");
+  const [password, setPassword] = useState("ChangeMe123!");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
@@ -37,13 +28,10 @@ function Login() {
     setLoading(true);
 
     try {
-      const { data } = await api.post(
-        "/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const { data } = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
       localStorage.setItem(
         "accessToken",
@@ -55,33 +43,24 @@ function Login() {
         JSON.stringify(data.data.user)
       );
 
-      nav("/dashboard");
+      nav("/dashboard", { replace: true });
 
     } catch (e) {
-
       setError(
         e.response?.data?.message ||
         "Login failed"
       );
-
     } finally {
-
       setLoading(false);
-
     }
   }
 
-
   return (
     <main className="auth">
-
       <form onSubmit={submit}>
-
         <h1>Ojat AI</h1>
 
-        <p>
-          Conversational Commerce OS
-        </p>
+        <p>Conversational Commerce OS</p>
 
         {error && (
           <div className="error">
@@ -91,9 +70,7 @@ function Login() {
 
         <input
           value={email}
-          onChange={e =>
-            setEmail(e.target.value)
-          }
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
           type="email"
           required
@@ -101,9 +78,7 @@ function Login() {
 
         <input
           value={password}
-          onChange={e =>
-            setPassword(e.target.value)
-          }
+          onChange={(e) => setPassword(e.target.value)}
           type="password"
           placeholder="Password"
           required
@@ -121,9 +96,7 @@ function Login() {
         <small>
           Seed demo credentials are prefilled.
         </small>
-
       </form>
-
     </main>
   );
 }
@@ -140,7 +113,9 @@ function Layout({ children }) {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
 
-    navigate("/login", { replace: true });
+    navigate("/login", {
+      replace: true,
+    });
   }
 
   return (
@@ -148,10 +123,21 @@ function Layout({ children }) {
       <aside>
         <h2>Ojat</h2>
 
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/ai-orders">AI Orders</Link>
-        <Link to="/products">Products</Link>
-        <Link to="/ai">AI Extractor</Link>
+        <Link to="/dashboard">
+          Dashboard
+        </Link>
+
+        <Link to="/ai-orders">
+          AI Orders
+        </Link>
+
+        <Link to="/products">
+          Products
+        </Link>
+
+        <Link to="/ai">
+          AI Extractor
+        </Link>
 
         <button onClick={logout}>
           Logout
@@ -165,64 +151,47 @@ function Layout({ children }) {
   );
 }
 
+
 /* =========================================================
    DASHBOARD
 ========================================================= */
 
 function Dashboard() {
+  const [d, setD] = useState(null);
+  const [error, setError] = useState("");
 
-  const [d, setD] =
-    useState(null);
-
-  const [error, setError] =
-    useState("");
-
-
-  React.useEffect(() => {
-
-    let mounted = true;
+  useEffect(() => {
+    let active = true;
 
     async function loadDashboard() {
-
       try {
-
         const response =
           await api.get("/dashboard");
 
-        if (mounted) {
+        if (active) {
           setD(response.data.data);
         }
 
       } catch (e) {
-
-        if (mounted) {
-
+        if (active) {
           setError(
             e.response?.data?.message ||
             "Unable to load dashboard"
           );
-
         }
-
       }
-
     }
 
     loadDashboard();
 
     return () => {
-      mounted = false;
+      active = false;
     };
-
   }, []);
-
 
   return (
     <Layout>
-
-      <h1>
-        Business Dashboard
-      </h1>
+      <h1>Business Dashboard</h1>
 
       {error && (
         <div className="error">
@@ -231,35 +200,24 @@ function Dashboard() {
       )}
 
       {!d && !error && (
-        <p>
-          Loading...
-        </p>
+        <p>Loading...</p>
       )}
 
       {d && (
         <div className="grid">
-
           {Object.entries(d).map(
             ([k, v]) => (
-
               <article key={k}>
-
-                <span>
-                  {k}
-                </span>
+                <span>{k}</span>
 
                 <strong>
                   {String(v)}
                 </strong>
-
               </article>
-
             )
           )}
-
         </div>
       )}
-
     </Layout>
   );
 }
@@ -270,35 +228,24 @@ function Dashboard() {
 ========================================================= */
 
 function Products() {
+  const [items, setItems] = useState([]);
 
-  const [items, setItems] =
-    useState([]);
+  const [form, setForm] = useState({
+    name: "",
+    sku: "",
+    sellingPrice: "",
+    quantity: "0",
+    minStock: "0",
+  });
 
-  const [form, setForm] =
-    useState({
-      name: "",
-      sku: "",
-      sellingPrice: "",
-      quantity: "0",
-      minStock: "0",
-    });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [adding, setAdding] = useState(false);
 
-  const [error, setError] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [adding, setAdding] =
-    useState(false);
-
-
-  async function load() {
-
+  async function loadProducts() {
     setLoading(true);
 
     try {
-
       const response =
         await api.get("/products");
 
@@ -309,61 +256,36 @@ function Products() {
       );
 
     } catch (e) {
-
       setError(
         e.response?.data?.message ||
         "Unable to load products"
       );
-
     } finally {
-
       setLoading(false);
-
     }
   }
 
-
-  /*
-   * IMPORTANT:
-   *
-   * Do NOT use:
-   *
-   * React.useEffect(load, [])
-   *
-   * because load() returns a Promise.
-   *
-   * React would treat that Promise as an
-   * effect cleanup function and crash when
-   * navigating away from this page.
-   */
-
-  React.useEffect(() => {
-    load();
+  useEffect(() => {
+    loadProducts();
   }, []);
 
-
   async function add(e) {
-
     e.preventDefault();
 
     setError("");
     setAdding(true);
 
     try {
-
-      await api.post(
-        "/products",
-        {
-          name: form.name,
-          sku: form.sku,
-          sellingPrice:
-            Number(form.sellingPrice),
-          quantity:
-            Number(form.quantity),
-          minStock:
-            Number(form.minStock),
-        }
-      );
+      await api.post("/products", {
+        name: form.name,
+        sku: form.sku,
+        sellingPrice:
+          Number(form.sellingPrice),
+        quantity:
+          Number(form.quantity),
+        minStock:
+          Number(form.minStock),
+      });
 
       setForm({
         name: "",
@@ -373,29 +295,21 @@ function Products() {
         minStock: "0",
       });
 
-      await load();
+      await loadProducts();
 
     } catch (e) {
-
       setError(
         e.response?.data?.message ||
         "Unable to create product"
       );
-
     } finally {
-
       setAdding(false);
-
     }
   }
 
-
   return (
     <Layout>
-
-      <h1>
-        Products & Inventory
-      </h1>
+      <h1>Products & Inventory</h1>
 
       {error && (
         <div className="error">
@@ -407,14 +321,12 @@ function Products() {
         className="row"
         onSubmit={add}
       >
-
-        {Object.keys(form).map(k => (
-
+        {Object.keys(form).map((k) => (
           <input
             key={k}
             placeholder={k}
             value={form[k]}
-            onChange={e =>
+            onChange={(e) =>
               setForm({
                 ...form,
                 [k]: e.target.value,
@@ -426,7 +338,6 @@ function Products() {
               k === "sellingPrice"
             }
           />
-
         ))}
 
         <button
@@ -437,54 +348,34 @@ function Products() {
             ? "Adding..."
             : "Add Product"}
         </button>
-
       </form>
 
-
       {loading ? (
-
-        <p>
-          Loading products...
-        </p>
-
+        <p>Loading products...</p>
       ) : (
-
         <table>
-
           <thead>
-
             <tr>
               <th>Name</th>
               <th>SKU</th>
               <th>Price</th>
               <th>Stock</th>
             </tr>
-
           </thead>
 
           <tbody>
-
             {items.length === 0 ? (
-
               <tr>
                 <td colSpan="4">
                   No products found.
                 </td>
               </tr>
-
             ) : (
-
-              items.map(p => (
-
+              items.map((p) => (
                 <tr key={p.id}>
+                  <td>{p.name}</td>
 
-                  <td>
-                    {p.name}
-                  </td>
-
-                  <td>
-                    {p.sku}
-                  </td>
+                  <td>{p.sku}</td>
 
                   <td>
                     ₦
@@ -496,19 +387,12 @@ function Products() {
                   <td>
                     {p.inventory?.quantity ?? 0}
                   </td>
-
                 </tr>
-
               ))
-
             )}
-
           </tbody>
-
         </table>
-
       )}
-
     </Layout>
   );
 }
@@ -519,64 +403,41 @@ function Products() {
 ========================================================= */
 
 function AI() {
+  const [m, setM] = useState(
+    "Abeg, send two red shoes to Ikeja"
+  );
 
-  const [m, setM] =
-    useState(
-      "Abeg, send two red shoes to Ikeja"
-    );
-
-  const [r, setR] =
-    useState(null);
-
-  const [error, setError] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
+  const [r, setR] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function run(e) {
-
     e.preventDefault();
 
     setError("");
     setLoading(true);
 
     try {
-
       const response =
-        await api.post(
-          "/ai/extract",
-          {
-            message: m,
-          }
-        );
+        await api.post("/ai/extract", {
+          message: m,
+        });
 
-      setR(
-        response.data.data
-      );
+      setR(response.data.data);
 
     } catch (e) {
-
       setError(
         e.response?.data?.message ||
         "Unable to extract commerce intent"
       );
-
     } finally {
-
       setLoading(false);
-
     }
   }
 
-
   return (
     <Layout>
-
-      <h1>
-        AI Commerce Extractor
-      </h1>
+      <h1>AI Commerce Extractor</h1>
 
       {error && (
         <div className="error">
@@ -585,12 +446,9 @@ function AI() {
       )}
 
       <form onSubmit={run}>
-
         <textarea
           value={m}
-          onChange={e =>
-            setM(e.target.value)
-          }
+          onChange={(e) => setM(e.target.value)}
           rows="5"
           required
         />
@@ -603,7 +461,6 @@ function AI() {
             ? "Extracting..."
             : "Extract Commerce Intent"}
         </button>
-
       </form>
 
       {r && (
@@ -615,7 +472,6 @@ function AI() {
           )}
         </pre>
       )}
-
     </Layout>
   );
 }
@@ -626,33 +482,18 @@ function AI() {
 ========================================================= */
 
 function AIOrders() {
+  const [items, setItems] = useState([]);
+  const [error, setError] = useState("");
+  const [reason, setReason] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [reviewing, setReviewing] = useState(null);
 
-  const [items, setItems] =
-    useState([]);
-
-  const [error, setError] =
-    useState("");
-
-  const [reason, setReason] =
-    useState({});
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [reviewing, setReviewing] =
-    useState(null);
-
-
-  async function load() {
-
+  async function loadOrders() {
     setLoading(true);
 
     try {
-
       const response =
-        await api.get(
-          "/ai-orders/pending"
-        );
+        await api.get("/ai-orders/pending");
 
       setItems(
         Array.isArray(response.data.data)
@@ -661,112 +502,72 @@ function AIOrders() {
       );
 
     } catch (e) {
-
       setError(
         e.response?.data?.message ||
         "Unable to load proposals"
       );
-
     } finally {
-
       setLoading(false);
-
     }
   }
 
-
-  /*
-   * IMPORTANT:
-   *
-   * Never use:
-   *
-   * React.useEffect(load, [])
-   *
-   * here because load() returns a Promise.
-   */
-
-  React.useEffect(() => {
-    load();
+  useEffect(() => {
+    loadOrders();
   }, []);
 
-
   async function review(id, action) {
-
     setError("");
+
+    if (
+      action === "reject" &&
+      !reason[id]?.trim()
+    ) {
+      setError(
+        "A rejection reason is required."
+      );
+      return;
+    }
+
     setReviewing(id);
 
     try {
-
-      if (
-        action === "reject" &&
-        !reason[id]?.trim()
-      ) {
-
-        setError(
-          "A rejection reason is required."
-        );
-
-        return;
-      }
-
-
       await api.post(
         `/ai-orders/${id}/${action}`,
         action === "reject"
           ? {
-              rejectionReason:
-                reason[id],
+              rejectionReason: reason[id],
             }
           : {}
       );
 
-
-      /*
-       * Functional state update prevents
-       * stale-state problems.
-       */
-
-      setItems(prev =>
+      setItems((prev) =>
         prev.filter(
-          item => item.id !== id
+          (item) => item.id !== id
         )
       );
 
-
-      setReason(prev => {
-
-        const next = {
-          ...prev,
-        };
+      setReason((prev) => {
+        const next = { ...prev };
 
         delete next[id];
 
         return next;
       });
 
-
     } catch (e) {
-
       setError(
         e.response?.data?.message ||
         "Review action failed"
       );
-
     } finally {
-
       setReviewing(null);
-
     }
   }
 
-
   return (
     <Layout>
-
       <div className="page-heading">
-
         <div>
-
           <p className="eyebrow">
             Human review queue
           </p>
@@ -779,15 +580,12 @@ function AIOrders() {
             Review what Ojat understood
             before inventory is reserved.
           </p>
-
         </div>
 
         <strong className="queue-count">
           {items.length} pending
         </strong>
-
       </div>
-
 
       {error && (
         <div className="error">
@@ -795,38 +593,30 @@ function AIOrders() {
         </div>
       )}
 
-
       {loading ? (
-
         <div className="empty">
-
           <h2>
             Loading proposals...
           </h2>
-
         </div>
 
       ) : items.length === 0 ? (
 
         <div className="empty">
-
           <h2>
             No pending proposals
           </h2>
 
           <p>
-            New WhatsApp orders will appear
-            here for review.
+            New WhatsApp orders will
+            appear here for review.
           </p>
-
         </div>
 
       ) : (
 
         <div className="proposal-list">
-
-          {items.map(item => {
-
+          {items.map((item) => {
             const product =
               item.matchedProduct || {};
 
@@ -834,9 +624,7 @@ function AIOrders() {
               item.customer || {};
 
             const aiConfidence =
-              Number(
-                item.aiConfidence || 0
-              );
+              Number(item.aiConfidence || 0);
 
             const productConfidence =
               Number(
@@ -848,18 +636,13 @@ function AIOrders() {
                 item.proposedTotal || 0
               );
 
-
             return (
-
               <article
                 className="proposal"
                 key={item.id}
               >
-
                 <div className="proposal-top">
-
                   <div>
-
                     <span className="status">
                       {item.status || "PENDING"}
                     </span>
@@ -870,22 +653,15 @@ function AIOrders() {
                     </h2>
 
                     <p className="muted">
-
                       {customer.name ||
                         "Customer"}
-
                       {" · "}
-
                       {customer.phone ||
                         "No phone"}
-
                     </p>
-
                   </div>
 
-
                   <div className="confidence">
-
                     <strong>
                       {Math.round(
                         aiConfidence * 100
@@ -896,26 +672,18 @@ function AIOrders() {
                     <span>
                       AI confidence
                     </span>
-
                   </div>
-
                 </div>
 
-
                 <blockquote>
-
                   “
                   {item.rawMessage ||
                     "No message available"}
                   ”
-
                 </blockquote>
 
-
                 <div className="proposal-facts">
-
                   <div>
-
                     <span>
                       Product match
                     </span>
@@ -926,61 +694,39 @@ function AIOrders() {
                       )}
                       %
                     </strong>
-
                   </div>
-
 
                   <div>
-
-                    <span>
-                      Quantity
-                    </span>
+                    <span>Quantity</span>
 
                     <strong>
-                      {item.requestedQuantity ??
-                        0}
+                      {item.requestedQuantity ?? 0}
                     </strong>
-
                   </div>
-
 
                   <div>
-
-                    <span>
-                      Inventory
-                    </span>
+                    <span>Inventory</span>
 
                     <strong>
-                      {item.availableInventory ??
-                        0}
+                      {item.availableInventory ?? 0}
                     </strong>
-
                   </div>
-
 
                   <div>
-
-                    <span>
-                      Total
-                    </span>
+                    <span>Total</span>
 
                     <strong>
-                      ₦
-                      {total.toLocaleString()}
+                      ₦{total.toLocaleString()}
                     </strong>
-
                   </div>
-
                 </div>
 
-
                 <div className="review-controls">
-
                   <input
                     value={
                       reason[item.id] || ""
                     }
-                    onChange={e =>
+                    onChange={(e) =>
                       setReason({
                         ...reason,
                         [item.id]:
@@ -993,8 +739,8 @@ function AIOrders() {
                     }
                   />
 
-
                   <button
+                    type="button"
                     className="reject"
                     onClick={() =>
                       review(
@@ -1011,8 +757,8 @@ function AIOrders() {
                       : "Reject"}
                   </button>
 
-
                   <button
+                    type="button"
                     onClick={() =>
                       review(
                         item.id,
@@ -1027,19 +773,12 @@ function AIOrders() {
                       ? "Processing..."
                       : "Approve"}
                   </button>
-
                 </div>
-
               </article>
-
             );
-
           })}
-
         </div>
-
       )}
-
     </Layout>
   );
 }
@@ -1050,12 +789,16 @@ function AIOrders() {
 ========================================================= */
 
 function Protected({ children }) {
-
   return localStorage.getItem(
     "accessToken"
   )
     ? children
-    : <Navigate to="/login" replace />;
+    : (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
 }
 
 
@@ -1064,9 +807,7 @@ function Protected({ children }) {
 ========================================================= */
 
 export default function App() {
-
   return (
-
     <Routes>
 
       <Route
