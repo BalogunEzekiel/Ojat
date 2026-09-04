@@ -236,9 +236,37 @@ textarea {
     color 0.2s ease;
 }
 
+.sidebar-nav a {
+  color: #d9eee5;
+
+  text-decoration: none;
+
+  padding: 11px 10px;
+
+  border-radius: 8px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
 .sidebar-nav a:hover {
   background: #1b3a2f;
   color: white;
+}
+
+.sidebar-nav a.active {
+  background: #126b4a;
+  color: white;
+
+  font-weight: 700;
+
+  box-shadow:
+    inset 3px 0 0 white;
+}
+
+.sidebar-nav a.active:hover {
+  background: #16835a;
 }
 
 .sidebar-nav a:active {
