@@ -134,12 +134,14 @@ function Login() {
 ========================================================= */
 
 function Layout({ children }) {
+  const navigate = useNavigate();
 
   function logout() {
-    localStorage.clear();
-    window.location.href = "/login";
-  }
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
 
+    navigate("/login", { replace: true });
+  }
 
   return (
     <div className="layout">
