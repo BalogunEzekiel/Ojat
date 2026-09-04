@@ -107,6 +107,13 @@ app.use(
   routes
 );
 
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Ojat AI API is running",
+    environment: process.env.NODE_ENV,
+  });
+});
 
 /* =========================================================
    ERROR HANDLING
