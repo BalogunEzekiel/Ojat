@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Routes,
   Route,
@@ -157,49 +158,32 @@ function Layout({ children }) {
 ========================================================= */
 
 function Dashboard() {
-  const [d, setD] = useState(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadDashboard() {
-      try {
-        const response =
-          await api.get("/dashboard");
-
-        if (active) {
-          setD(response.data.data);
-        }
-
-      } catch (e) {
-        if (active) {
-          setError(
-            e.response?.data?.message ||
-            "Unable to load dashboard"
-          );
-        }
-      }
-    }
-
-    loadDashboard();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  const {
+    data: d,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: async () => {
+      const response = await api.get("/dashboard");
+      return response.data.data;
+    },
+    staleTime: 30 * 1000,
+  });
 
   return (
     <Layout>
       <h1>Business Dashboard</h1>
 
-      {error && (
+      {isError && (
         <div className="error">
-          {error}
+          {error.response?.data?.message ||
+            "Unable to load dashboard"}
         </div>
       )}
 
-      {!d && !error && (
+      {isLoading && (
         <p>Loading...</p>
       )}
 
@@ -222,13 +206,28 @@ function Dashboard() {
   );
 }
 
-
 /* =========================================================
    PRODUCTS
 ========================================================= */
 
 function Products() {
-  const [items, setItems] = useState([]);
+  const {
+    data: items = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await api.get("/products");
+
+      return Array.isArray(response.data.data)
+        ? response.data.data
+        : [];
+    },
+    staleTime: 60 * 1000,
+  });
 
   const [form, setForm] = useState({
     name: "",
@@ -238,53 +237,22 @@ function Products() {
     minStock: "0",
   });
 
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [adding, setAdding] = useState(false);
-
-  async function loadProducts() {
-    setLoading(true);
-
-    try {
-      const response =
-        await api.get("/products");
-
-      setItems(
-        Array.isArray(response.data.data)
-          ? response.data.data
-          : []
-      );
-
-    } catch (e) {
-      setError(
-        e.response?.data?.message ||
-        "Unable to load products"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
 
   async function add(e) {
     e.preventDefault();
 
-    setError("");
+    setErrorMessage("");
     setAdding(true);
 
     try {
       await api.post("/products", {
         name: form.name,
         sku: form.sku,
-        sellingPrice:
-          Number(form.sellingPrice),
-        quantity:
-          Number(form.quantity),
-        minStock:
-          Number(form.minStock),
+        sellingPrice: Number(form.sellingPrice),
+        quantity: Number(form.quantity),
+        minStock: Number(form.minStock),
       });
 
       setForm({
@@ -295,10 +263,10 @@ function Products() {
         minStock: "0",
       });
 
-      await loadProducts();
+      await refetch();
 
     } catch (e) {
-      setError(
+      setErrorMessage(
         e.response?.data?.message ||
         "Unable to create product"
       );
@@ -311,9 +279,11 @@ function Products() {
     <Layout>
       <h1>Products & Inventory</h1>
 
-      {error && (
+      {(errorMessage || isError) && (
         <div className="error">
-          {error}
+          {errorMessage ||
+            error.response?.data?.message ||
+            "Unable to load products"}
         </div>
       )}
 
@@ -350,7 +320,7 @@ function Products() {
         </button>
       </form>
 
-      {loading ? (
+      {isLoading ? (
         <p>Loading products...</p>
       ) : (
         <table>
@@ -396,7 +366,6 @@ function Products() {
     </Layout>
   );
 }
-
 
 /* =========================================================
    AI COMMERCE EXTRACTOR
@@ -482,47 +451,37 @@ function AI() {
 ========================================================= */
 
 function AIOrders() {
-  const [items, setItems] = useState([]);
-  const [error, setError] = useState("");
-  const [reason, setReason] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [reviewing, setReviewing] = useState(null);
-
-  async function loadOrders() {
-    setLoading(true);
-
-    try {
+  const {
+    data: items = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["ai-orders", "pending"],
+    queryFn: async () => {
       const response =
         await api.get("/ai-orders/pending");
 
-      setItems(
-        Array.isArray(response.data.data)
-          ? response.data.data
-          : []
-      );
+      return Array.isArray(response.data.data)
+        ? response.data.data
+        : [];
+    },
+    staleTime: 15 * 1000,
+  });
 
-    } catch (e) {
-      setError(
-        e.response?.data?.message ||
-        "Unable to load proposals"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadOrders();
-  }, []);
+  const [reason, setReason] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
+  const [reviewing, setReviewing] = useState(null);
 
   async function review(id, action) {
-    setError("");
+    setErrorMessage("");
 
     if (
       action === "reject" &&
       !reason[id]?.trim()
     ) {
-      setError(
+      setErrorMessage(
         "A rejection reason is required."
       );
       return;
@@ -540,22 +499,16 @@ function AIOrders() {
           : {}
       );
 
-      setItems((prev) =>
-        prev.filter(
-          (item) => item.id !== id
-        )
-      );
-
       setReason((prev) => {
         const next = { ...prev };
-
         delete next[id];
-
         return next;
       });
 
+      await refetch();
+
     } catch (e) {
-      setError(
+      setErrorMessage(
         e.response?.data?.message ||
         "Review action failed"
       );
@@ -587,13 +540,15 @@ function AIOrders() {
         </strong>
       </div>
 
-      {error && (
+      {(errorMessage || isError) && (
         <div className="error">
-          {error}
+          {errorMessage ||
+            error.response?.data?.message ||
+            "Unable to load proposals"}
         </div>
       )}
 
-      {loading ? (
+      {isLoading ? (
         <div className="empty">
           <h2>
             Loading proposals...
@@ -697,7 +652,9 @@ function AIOrders() {
                   </div>
 
                   <div>
-                    <span>Quantity</span>
+                    <span>
+                      Quantity
+                    </span>
 
                     <strong>
                       {item.requestedQuantity ?? 0}
@@ -705,7 +662,9 @@ function AIOrders() {
                   </div>
 
                   <div>
-                    <span>Inventory</span>
+                    <span>
+                      Inventory
+                    </span>
 
                     <strong>
                       {item.availableInventory ?? 0}
@@ -713,7 +672,9 @@ function AIOrders() {
                   </div>
 
                   <div>
-                    <span>Total</span>
+                    <span>
+                      Total
+                    </span>
 
                     <strong>
                       ₦{total.toLocaleString()}
@@ -782,7 +743,6 @@ function AIOrders() {
     </Layout>
   );
 }
-
 
 /* =========================================================
    AUTH GUARD
