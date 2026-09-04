@@ -145,41 +145,25 @@ function Layout({ children }) {
 
   return (
     <div className="layout">
-
       <aside>
-
         <h2>Ojat</h2>
 
-        <Link to="/dashboard">
-          Dashboard
-        </Link>
-
-        <Link to="/ai-orders">
-          AI Orders
-        </Link>
-
-        <Link to="/products">
-          Products
-        </Link>
-
-        <Link to="/ai">
-          AI Extractor
-        </Link>
+        <Link to="/dashboard">Dashboard</Link>
+        <Link to="/ai-orders">AI Orders</Link>
+        <Link to="/products">Products</Link>
+        <Link to="/ai">AI Extractor</Link>
 
         <button onClick={logout}>
           Logout
         </button>
-
       </aside>
 
       <section className="content">
         {children}
       </section>
-
     </div>
   );
 }
-
 
 /* =========================================================
    DASHBOARD
