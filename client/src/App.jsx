@@ -98,56 +98,139 @@ function Login() {
   );
 }
 
-
 /* =========================================================
    APPLICATION LAYOUT
 ========================================================= */
 
 function Layout({ children }) {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   function logout() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
+
+    setSidebarOpen(false);
 
     navigate("/login", {
       replace: true,
     });
   }
 
+  function closeSidebar() {
+    setSidebarOpen(false);
+  }
+
   return (
     <div className="layout">
-      <aside>
-        <h2>Ojat</h2>
 
-        <Link to="/dashboard">
-          Dashboard
-        </Link>
+      {/* MOBILE HEADER */}
+      <header className="mobile-header">
+        <button
+          type="button"
+          className="hamburger"
+          onClick={() =>
+            setSidebarOpen((open) => !open)
+          }
+          aria-label={
+            sidebarOpen
+              ? "Close navigation"
+              : "Open navigation"
+          }
+          aria-expanded={sidebarOpen}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
 
-        <Link to="/ai-orders">
-          AI Orders
-        </Link>
+        <strong>Ojat</strong>
+      </header>
 
-        <Link to="/products">
-          Products
-        </Link>
+      {/* MOBILE OVERLAY */}
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="sidebar-overlay"
+          onClick={closeSidebar}
+          aria-label="Close navigation"
+        />
+      )}
 
-        <Link to="/ai">
-          AI Extractor
-        </Link>
+      {/* SIDEBAR */}
+      <aside
+        className={
+          sidebarOpen
+            ? "sidebar sidebar-open"
+            : "sidebar"
+        }
+      >
+        <div className="sidebar-top">
 
-        <button onClick={logout}>
+          <div className="sidebar-brand">
+            <h2>Ojat</h2>
+
+            <button
+              type="button"
+              className="sidebar-close"
+              onClick={closeSidebar}
+              aria-label="Close navigation"
+            >
+              ×
+            </button>
+          </div>
+
+          <nav className="sidebar-nav">
+
+            <Link
+              to="/dashboard"
+              onClick={closeSidebar}
+            >
+              Dashboard
+            </Link>
+
+            <Link
+              to="/ai-orders"
+              onClick={closeSidebar}
+            >
+              AI Orders
+            </Link>
+
+            <Link
+              to="/products"
+              onClick={closeSidebar}
+            >
+              Products
+            </Link>
+
+            <Link
+              to="/ai"
+              onClick={closeSidebar}
+            >
+              AI Extractor
+            </Link>
+
+          </nav>
+
+        </div>
+
+        <button
+          type="button"
+          className="sidebar-logout"
+          onClick={logout}
+        >
           Logout
         </button>
       </aside>
 
+      {/* PAGE CONTENT */}
       <section className="content">
         {children}
       </section>
+
     </div>
   );
 }
-
 
 /* =========================================================
    DASHBOARD
