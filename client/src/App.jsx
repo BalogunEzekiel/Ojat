@@ -93,10 +93,6 @@ function Login() {
             ? "Signing in..."
             : "Sign in"}
         </button>
-
-        <small>
-          Seed demo credentials are prefilled.
-        </small>
       </form>
     </main>
   );
