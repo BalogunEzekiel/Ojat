@@ -18,6 +18,9 @@ import {
   queueWhatsAppMessage,
 } from "../queues/whatsapp.queue.js";
 
+import {
+  handlePaystackSuccess,
+} from "../services/payment.service.js";
 
 const r =
   Router();
@@ -537,16 +540,54 @@ r.post(
         req.body;
 
 
-      const eventId =
-        event.data?.reference ||
-        `paystack-${Date.now()}`;
+      const reference =
+        event.data?.reference;
 
 
       /* =====================================
-         IDEMPOTENCY CHECK
+         BASIC VALIDATION
       ===================================== */
 
-      const exists =
+      if (
+        !reference
+      ) {
+
+        console.warn(
+          "Paystack webhook received without transaction reference"
+        );
+
+        /*
+         * The webhook signature has already been
+         * verified by verifyPaystackWebhook.
+         *
+         * There is nothing safe to process without
+         * a transaction reference.
+         */
+
+        return res.sendStatus(200);
+
+      }
+
+
+      /*
+       * Paystack can send multiple event types for
+       * the same transaction.
+       *
+       * Therefore, reference alone should not be
+       * treated as the universal webhook event ID.
+       */
+
+      const eventId =
+        event.id
+          ? String(event.id)
+          : `${event.event}:${reference}`;
+
+
+      /* =====================================
+         FIND EXISTING WEBHOOK EVENT
+      ===================================== */
+
+      const existingEvent =
         await prisma.webhookEvent.findUnique({
 
           where: {
@@ -556,7 +597,13 @@ r.post(
         });
 
 
-      if (exists) {
+      if (
+        existingEvent?.processed
+      ) {
+
+        console.log(
+          `Duplicate processed Paystack webhook ignored: ${eventId}`
+        );
 
         return res.sendStatus(200);
 
@@ -564,27 +611,58 @@ r.post(
 
 
       /* =====================================
-         STORE EVENT
+         STORE WEBHOOK EVENT
       ===================================== */
 
-      await prisma.webhookEvent.create({
+      if (
+        !existingEvent
+      ) {
 
-        data: {
+        try {
 
-          provider:
-            "PAYSTACK",
+          await prisma.webhookEvent.create({
 
-          eventId,
+            data: {
 
-          payload:
-            event,
+              provider:
+                "PAYSTACK",
 
-          processed:
-            false,
+              eventId,
 
-        },
+              payload:
+                event,
 
-      });
+              processed:
+                false,
+
+            },
+
+          });
+
+        } catch (error) {
+
+          /*
+           * Another webhook request may have inserted
+           * the same event concurrently.
+           */
+
+          if (
+            error?.code === "P2002"
+          ) {
+
+            console.log(
+              `Paystack webhook race detected: ${eventId}`
+            );
+
+          } else {
+
+            throw error;
+
+          }
+
+        }
+
+      }
 
 
       /* =====================================
@@ -595,29 +673,52 @@ r.post(
         event.event === "charge.success"
       ) {
 
-        await prisma.payment.updateMany({
+        /*
+         * IMPORTANT:
+         *
+         * Do NOT update payment.status directly.
+         *
+         * handlePaystackSuccess() performs:
+         *
+         * 1. Paystack verification
+         * 2. Reference validation
+         * 3. Amount validation
+         * 4. Currency validation
+         * 5. Order validation
+         * 6. Inventory deduction
+         * 7. Reservation release
+         * 8. Inventory transaction creation
+         * 9. Payment SUCCESS
+         * 10. Invoice PAID
+         * 11. Order PROCESSING
+         *
+         * It is also idempotent.
+         */
 
-          where: {
+        const result =
+          await handlePaystackSuccess(
+            reference
+          );
 
-            reference:
-              event.data?.reference,
 
-          },
-
-          data: {
-
-            status:
-              "SUCCESS",
-
-          },
-
-        });
+        console.log(
+          "Paystack payment finalized:",
+          {
+            reference,
+            alreadyProcessed:
+              result?.alreadyProcessed,
+            paymentId:
+              result?.payment?.id,
+            orderId:
+              result?.order?.id,
+          }
+        );
 
       }
 
 
       /* =====================================
-         MARK AS PROCESSED
+         MARK WEBHOOK AS PROCESSED
       ===================================== */
 
       await prisma.webhookEvent.update({
@@ -641,6 +742,25 @@ r.post(
       return res.sendStatus(200);
 
     } catch (error) {
+
+      console.error(
+        "Paystack webhook processing error:",
+        error
+      );
+
+
+      /*
+       * VERY IMPORTANT:
+       *
+       * Do not mark the webhook as processed here.
+       *
+       * processed remains false, allowing Paystack
+       * to retry the webhook.
+       *
+       * The payment finalization transaction is also
+       * atomic, so a failed finalization will roll back
+       * its database changes.
+       */
 
       return next(error);
 
