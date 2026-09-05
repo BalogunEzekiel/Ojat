@@ -592,24 +592,6 @@ r.post(
                MARK WEBHOOK EVENT PROCESSED
             ===================================== */
 
-            await prisma.webhookEvent.update({
-
-              where: {
-
-                eventId,
-
-              },
-
-              data: {
-
-                processed:
-                  true,
-
-              },
-
-            });
-
-
             console.log(
               `WhatsApp message processed successfully: ${eventId}`
             );
