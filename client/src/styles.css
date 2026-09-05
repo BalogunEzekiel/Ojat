@@ -1,5 +1,5 @@
 /* =========================================================
-   RESET & BASE
+   OJAT AI — GLOBAL STYLES
 ========================================================= */
 
 * {
@@ -8,7 +8,6 @@
 
 html {
   min-height: 100%;
-  font-size: 16px;
 }
 
 body {
@@ -16,19 +15,10 @@ body {
   min-width: 320px;
   min-height: 100vh;
 
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Arial,
-    sans-serif;
+  font-family: Inter, Arial, sans-serif;
 
   background: #f5f7fb;
   color: #182230;
-
-  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -41,28 +31,27 @@ button {
   cursor: pointer;
 
   background: #126b4a;
-  color: #ffffff;
+  color: white;
 
   border: 0;
-  border-radius: 9px;
+  border-radius: 8px;
 
-  padding: 12px 18px;
+  padding: 11px 16px;
 
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 600;
 
   transition:
+    background 0.2s ease,
     opacity 0.2s ease,
-    transform 0.15s ease,
-    background 0.2s ease;
+    transform 0.1s ease;
 }
 
 button:hover:not(:disabled) {
-  background: #0d573c;
+  background: #0e5a3e;
 }
 
 button:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: translateY(1px);
 }
 
 button:disabled {
@@ -74,37 +63,37 @@ input,
 textarea {
   width: 100%;
 
-  padding: 12px 14px;
+  padding: 12px;
 
   border: 1px solid #d7dce5;
-  border-radius: 9px;
+  border-radius: 8px;
 
   margin: 6px 0;
 
-  background: #ffffff;
+  background: #fff;
   color: #182230;
 
   outline: none;
 
-  font-size: 15px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 input:focus,
 textarea:focus {
   border-color: #126b4a;
 
-  box-shadow:
-    0 0 0 3px rgba(18, 107, 74, 0.1);
+  box-shadow: 0 0 0 3px rgba(18, 107, 74, 0.1);
 }
 
 textarea {
   resize: vertical;
-  min-height: 120px;
 }
 
 
 /* =========================================================
-   AUTH
+   AUTH / LOGIN
 ========================================================= */
 
 .auth {
@@ -113,35 +102,34 @@ textarea {
   display: grid;
   place-items: center;
 
-  padding: 20px;
+  padding: 24px;
 }
 
 .auth form {
-  width: min(420px, 100%);
+  width: min(420px, 90vw);
 
   padding: 32px;
 
-  background: #ffffff;
+  background: white;
 
-  border-radius: 18px;
+  border-radius: 16px;
 
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px #0001;
 }
 
 .auth h1 {
   margin: 0 0 8px;
-  font-size: 32px;
 }
 
 .auth p {
   margin: 0 0 24px;
+
   color: #667085;
 }
 
 .auth button {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 
@@ -152,7 +140,6 @@ textarea {
 .layout {
   display: flex;
 
-  width: 100%;
   min-height: 100vh;
 }
 
@@ -162,34 +149,57 @@ textarea {
 ========================================================= */
 
 .layout aside {
-  width: 250px;
-  flex-shrink: 0;
-
+  width: 240px;
   height: 100vh;
 
   position: sticky;
   top: 0;
 
-  display: flex;
-  flex-direction: column;
+  flex-shrink: 0;
 
-  padding: 22px 16px;
+  padding: 24px;
 
   background: #10251d;
-  color: #ffffff;
+  color: white;
+
+  display: flex;
+  flex-direction: column;
 
   overflow: hidden;
 }
 
-.layout aside h2 {
-  margin: 0;
 
-  padding: 4px 10px 20px;
+/* =========================================================
+   SIDEBAR TOP
+========================================================= */
 
-  font-size: 25px;
-  font-weight: 800;
+.sidebar-top {
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================================================
+   SIDEBAR BRAND
+========================================================= */
+
+.sidebar-brand {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
 
   flex-shrink: 0;
+}
+
+.sidebar-brand h2 {
+  margin: 0 0 24px;
+
+  font-size: 24px;
 }
 
 
@@ -203,62 +213,64 @@ textarea {
 
   gap: 6px;
 
-  flex: 1;
+  min-height: 0;
 
   overflow-y: auto;
 
-  padding: 4px 2px;
+  padding-right: 4px;
 
   scrollbar-width: thin;
 }
 
 .sidebar-nav a {
-  display: flex;
-  align-items: center;
-
-  min-height: 44px;
-
-  padding: 11px 13px;
-
   color: #d9eee5;
 
   text-decoration: none;
 
-  border-radius: 9px;
+  padding: 11px 10px;
 
-  font-size: 15px;
-  font-weight: 500;
+  border-radius: 8px;
 
   transition:
     background 0.2s ease,
-    color 0.2s ease,
-    transform 0.15s ease;
+    color 0.2s ease;
+}
 
-  flex-shrink: 0;
+.sidebar-nav a {
+  color: #d9eee5;
+
+  text-decoration: none;
+
+  padding: 11px 10px;
+
+  border-radius: 8px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .sidebar-nav a:hover {
   background: #1b3a2f;
-  color: #ffffff;
+  color: white;
 }
-
-
-/* ACTIVE TAB */
 
 .sidebar-nav a.active {
   background: #126b4a;
-
-  color: #ffffff;
+  color: white;
 
   font-weight: 700;
 
   box-shadow:
-    inset 4px 0 0 #ffffff,
-    0 4px 12px rgba(0, 0, 0, 0.12);
+    inset 3px 0 0 white;
 }
 
 .sidebar-nav a.active:hover {
   background: #16835a;
+}
+
+.sidebar-nav a:active {
+  background: #24503f;
 }
 
 
@@ -266,20 +278,45 @@ textarea {
    SIDEBAR LOGOUT
 ========================================================= */
 
-.layout aside > button {
+.sidebar-logout {
   width: 100%;
+
+  margin-top: 20px;
 
   flex-shrink: 0;
 
-  margin-top: 16px;
-
-  background: #8f2d24;
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #126b4a;
 }
 
-.layout aside > button:hover {
-  background: #b42318;
+.sidebar-logout:hover {
+  background: #16835a;
+}
+
+
+/* =========================================================
+   SIDEBAR CLOSE BUTTON
+========================================================= */
+
+.sidebar-close {
+  display: none;
+}
+
+
+/* =========================================================
+   MOBILE HEADER
+========================================================= */
+
+.mobile-header {
+  display: none;
+}
+
+
+/* =========================================================
+   SIDEBAR OVERLAY
+========================================================= */
+
+.sidebar-overlay {
+  display: none;
 }
 
 
@@ -299,13 +336,6 @@ textarea {
 
 .content h1 {
   margin-top: 0;
-
-  font-size: clamp(26px, 3vw, 36px);
-  line-height: 1.2;
-}
-
-.content h2 {
-  line-height: 1.3;
 }
 
 
@@ -317,22 +347,19 @@ textarea {
   display: grid;
 
   grid-template-columns:
-    repeat(auto-fit, minmax(200px, 1fr));
+    repeat(auto-fit, minmax(180px, 1fr));
 
   gap: 18px;
 }
 
 .grid article {
-  min-width: 0;
-
-  background: #ffffff;
+  background: white;
 
   padding: 24px;
 
   border-radius: 14px;
 
-  box-shadow:
-    0 3px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 3px 12px #0000000c;
 }
 
 .grid span {
@@ -341,49 +368,37 @@ textarea {
   color: #667085;
 
   text-transform: capitalize;
-
-  font-size: 14px;
 }
 
 .grid strong {
   display: block;
 
-  font-size: clamp(26px, 4vw, 32px);
+  font-size: 28px;
 
   margin-top: 8px;
-
-  overflow-wrap: anywhere;
 }
 
 
 /* =========================================================
-   PRODUCT FORM
+   FORMS / PRODUCT ROW
 ========================================================= */
 
 .row {
   display: grid;
 
   grid-template-columns:
-    repeat(5, minmax(120px, 1fr));
+    repeat(5, 1fr);
 
-  gap: 10px;
+  gap: 8px;
 
   align-items: center;
 
   margin-bottom: 24px;
 }
 
-.row input {
-  min-width: 0;
-}
-
-.row button {
-  white-space: nowrap;
-}
-
 
 /* =========================================================
-   TABLES
+   TABLE
 ========================================================= */
 
 table {
@@ -391,7 +406,7 @@ table {
 
   border-collapse: collapse;
 
-  background: #ffffff;
+  background: white;
 
   border-radius: 12px;
 
@@ -402,23 +417,21 @@ th,
 td {
   text-align: left;
 
-  padding: 15px;
+  padding: 14px;
 
-  border-bottom: 1px solid #edf0f3;
-
-  font-size: 15px;
+  border-bottom: 1px solid #eee;
 }
 
 th {
-  background: #f8fafc;
+  font-size: 13px;
 
   color: #475467;
 
-  font-weight: 700;
+  background: #f9fafb;
 }
 
-td {
-  white-space: nowrap;
+tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 
@@ -427,52 +440,46 @@ td {
 ========================================================= */
 
 .error {
-  margin: 14px 0;
-
-  padding: 13px 15px;
-
-  border-radius: 9px;
-
   background: #fee4e2;
+
+  padding: 10px;
+
+  border-radius: 8px;
 
   color: #b42318;
 
-  font-size: 14px;
+  margin-bottom: 16px;
 }
 
 
 /* =========================================================
-   AI OUTPUT
+   CODE / AI RESPONSE
 ========================================================= */
 
 pre {
-  width: 100%;
-
-  padding: 20px;
-
   background: #111827;
 
   color: #d1fae5;
 
-  border-radius: 12px;
+  padding: 20px;
 
-  overflow-x: auto;
+  border-radius: 10px;
 
-  font-size: 14px;
+  overflow: auto;
 
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 
 /* =========================================================
-   PAGE HEADING
+   AI ORDER PAGE HEADING
 ========================================================= */
 
 .page-heading {
   display: flex;
 
   justify-content: space-between;
+
   align-items: flex-start;
 
   gap: 20px;
@@ -480,38 +487,34 @@ pre {
   margin-bottom: 28px;
 }
 
-.page-heading h1 {
-  margin-bottom: 8px;
-}
-
 .eyebrow {
-  margin: 0 0 6px;
-
   color: #126b4a;
 
   font-size: 12px;
 
-  font-weight: 800;
+  font-weight: 700;
 
   letter-spacing: 0.08em;
 
   text-transform: uppercase;
+
+  margin: 0 0 8px;
+}
+
+.page-heading h1 {
+  margin: 0;
 }
 
 .muted {
   color: #667085;
-
-  line-height: 1.6;
 }
 
 .queue-count {
-  flex-shrink: 0;
-
   background: #e5f4ed;
 
   color: #126b4a;
 
-  padding: 10px 15px;
+  padding: 10px 14px;
 
   border-radius: 999px;
 
@@ -528,22 +531,19 @@ pre {
 
   gap: 18px;
 
-  width: 100%;
-
-  max-width: 950px;
+  max-width: 900px;
 }
 
 .proposal {
-  background: #ffffff;
+  background: #fff;
 
   border: 1px solid #e4e8ee;
 
-  border-radius: 16px;
+  border-radius: 14px;
 
   padding: 24px;
 
-  box-shadow:
-    0 3px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 3px 12px #0000000c;
 }
 
 .proposal-top {
@@ -551,43 +551,33 @@ pre {
 
   justify-content: space-between;
 
-  gap: 20px;
+  gap: 18px;
 }
 
 .proposal h2 {
-  margin: 10px 0 5px;
-
-  font-size: 22px;
+  margin: 10px 0 4px;
 }
 
 .status {
-  display: inline-block;
-
-  padding: 5px 8px;
-
   font-size: 11px;
 
-  font-weight: 800;
+  font-weight: 700;
 
   letter-spacing: 0.08em;
 
   color: #126b4a;
-
-  background: #e5f4ed;
-
-  border-radius: 999px;
 }
 
 .confidence {
-  flex-shrink: 0;
-
   text-align: right;
+
+  flex-shrink: 0;
 }
 
 .confidence strong {
   display: block;
 
-  font-size: 30px;
+  font-size: 28px;
 
   color: #126b4a;
 }
@@ -601,54 +591,43 @@ pre {
   font-size: 12px;
 }
 
-.proposal blockquote {
-  margin: 22px 0;
 
-  padding: 16px 18px;
+/* =========================================================
+   RAW CUSTOMER MESSAGE
+========================================================= */
+
+.proposal blockquote {
+  margin: 20px 0;
+
+  padding: 15px 18px;
 
   background: #f5f7fb;
 
-  border-left: 4px solid #126b4a;
+  border-left: 3px solid #126b4a;
 
   color: #344054;
 
-  line-height: 1.6;
-
-  overflow-wrap: anywhere;
+  border-radius: 0 8px 8px 0;
 }
 
 
 /* =========================================================
-   PROPOSAL FACTS
+   AI ORDER FACTS
 ========================================================= */
 
 .proposal-facts {
   display: grid;
 
   grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+    repeat(4, 1fr);
 
   gap: 12px;
-}
-
-.proposal-facts > div {
-  min-width: 0;
-
-  padding: 12px;
-
-  background: #f8fafc;
-
-  border-radius: 10px;
 }
 
 .proposal-facts strong {
   display: block;
 
-  margin-top: 6px;
-
-  font-size: 17px;
-
-  overflow-wrap: anywhere;
+  margin-top: 5px;
 }
 
 
@@ -659,7 +638,7 @@ pre {
 .review-controls {
   display: flex;
 
-  gap: 10px;
+  gap: 8px;
 
   align-items: center;
 
@@ -667,11 +646,9 @@ pre {
 }
 
 .review-controls input {
-  flex: 1;
+  margin: 0;
 
   min-width: 0;
-
-  margin: 0;
 }
 
 .review-controls button {
@@ -683,7 +660,7 @@ pre {
 }
 
 .review-controls .reject:hover:not(:disabled) {
-  background: #8f1c13;
+  background: #912018;
 }
 
 
@@ -692,15 +669,13 @@ pre {
 ========================================================= */
 
 .empty {
-  width: 100%;
+  background: #fff;
+
+  border-radius: 14px;
+
+  padding: 40px;
 
   max-width: 900px;
-
-  background: #ffffff;
-
-  border-radius: 16px;
-
-  padding: 48px 30px;
 
   text-align: center;
 }
@@ -711,296 +686,464 @@ pre {
 
 
 /* =========================================================
-   TABLE RESPONSIVE WRAPPER
-========================================================= */
-
-.content {
-  overflow-x: auto;
-}
-
-
-/* =========================================================
    TABLET
 ========================================================= */
 
 @media (max-width: 1000px) {
 
+  .layout aside {
+    width: 210px;
+
+    padding: 20px;
+  }
+
   .content {
-    padding: 28px 24px;
+    padding: 28px;
   }
 
   .row {
     grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+      repeat(2, 1fr);
   }
 
-  .proposal-facts {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
 }
 
 
 /* =========================================================
-   MOBILE
+   MOBILE — MAX 760px
 ========================================================= */
 
 @media (max-width: 760px) {
 
-  html {
-    font-size: 17px;
-  }
-
-  body {
-    overflow-x: hidden;
-  }
-
-
-  /* LAYOUT */
+  /* -------------------------------------------------------
+     MAIN LAYOUT
+  ------------------------------------------------------- */
 
   .layout {
     display: block;
 
-    min-height: 100dvh;
+    min-height: 100vh;
   }
 
 
-  /* SIDEBAR */
+  /* -------------------------------------------------------
+     MOBILE HEADER
+  ------------------------------------------------------- */
+
+  .mobile-header {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 60px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 0 16px;
+
+    background: white;
+
+    border-bottom: 1px solid #e4e8ee;
+
+    z-index: 1000;
+  }
+
+  .mobile-header strong {
+    font-size: 18px;
+
+    color: #10251d;
+  }
+
+
+  /* -------------------------------------------------------
+     HAMBURGER
+  ------------------------------------------------------- */
+
+  .hamburger {
+    width: 42px;
+    height: 42px;
+
+    padding: 8px;
+
+    margin: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 5px;
+
+    background: #10251d;
+
+    border-radius: 8px;
+  }
+
+  .hamburger:hover {
+    background: #1b3a2f;
+  }
+
+  .hamburger span {
+    display: block;
+
+    width: 22px;
+    height: 2px;
+
+    background: white;
+
+    border-radius: 2px;
+  }
+
+
+  /* -------------------------------------------------------
+     MOBILE SIDEBAR DRAWER
+  ------------------------------------------------------- */
 
   .layout aside {
-    width: 100%;
-
-    height: 100dvh;
-
     position: fixed;
 
     top: 0;
     left: 0;
 
-    z-index: 1000;
+    width: min(280px, 85vw);
 
-    padding:
-      calc(16px + env(safe-area-inset-top))
-      16px
-      calc(16px + env(safe-area-inset-bottom));
+    height: 100dvh;
+
+    padding: 20px;
+
+    z-index: 1100;
 
     transform: translateX(-100%);
 
-    transition: transform 0.25s ease;
+    transition:
+      transform 0.25s ease;
 
     box-shadow:
-      8px 0 30px rgba(0, 0, 0, 0.25);
+      8px 0 30px rgba(0, 0, 0, 0.18);
+
+    overflow: hidden;
   }
 
-  .layout aside.open {
+  .layout aside.sidebar-open {
     transform: translateX(0);
   }
 
-  .layout aside h2 {
-    padding-bottom: 14px;
+
+  /* -------------------------------------------------------
+     MOBILE SIDEBAR BRAND
+  ------------------------------------------------------- */
+
+  .sidebar-brand {
+    min-height: 42px;
+  }
+
+  .sidebar-brand h2 {
+    margin: 0;
+
+    font-size: 23px;
   }
 
 
-  /* SIDEBAR NAV */
+  /* -------------------------------------------------------
+     CLOSE BUTTON
+  ------------------------------------------------------- */
+
+  .sidebar-close {
+    display: flex;
+
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+    margin: 0;
+
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 30px;
+
+    font-weight: 300;
+
+    line-height: 1;
+
+    border-radius: 8px;
+  }
+
+  .sidebar-close:hover {
+    background: #1b3a2f;
+  }
+
+
+  /* -------------------------------------------------------
+     MOBILE NAVIGATION
+  ------------------------------------------------------- */
 
   .sidebar-nav {
-    gap: 8px;
+    margin-top: 24px;
+
+    gap: 6px;
+
+    overflow-y: auto;
 
     min-height: 0;
 
-    padding-bottom: 12px;
+    /*
+      The navigation gets its own scroll area.
+      It can never force the sidebar beyond
+      the phone viewport.
+    */
+    max-height: calc(100dvh - 150px);
   }
 
   .sidebar-nav a {
-    min-height: 50px;
-
-    padding: 13px 15px;
-
-    font-size: 16px;
+    padding: 12px 10px;
   }
 
 
-  /* LOGOUT ALWAYS INSIDE VIEWPORT */
+  /* -------------------------------------------------------
+     MOBILE LOGOUT
+  ------------------------------------------------------- */
 
-  .layout aside > button {
-    min-height: 48px;
-
-    margin-top: 10px;
+  .sidebar-logout {
+    margin-top: 14px;
   }
 
 
-  /* CONTENT */
+  /* -------------------------------------------------------
+     DARK OVERLAY
+  ------------------------------------------------------- */
+
+  .sidebar-overlay {
+    display: block;
+
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    padding: 0;
+
+    margin: 0;
+
+    border: 0;
+
+    border-radius: 0;
+
+    z-index: 1050;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    cursor: pointer;
+  }
+
+
+  /* -------------------------------------------------------
+     MAIN CONTENT
+  ------------------------------------------------------- */
 
   .content {
     width: 100%;
 
-    min-height: 100dvh;
+    min-width: 0;
 
-    padding:
-      80px 16px 28px;
+    padding: 80px 20px 24px;
 
-    overflow-x: auto;
-  }
-
-  .content h1 {
-    font-size: 28px;
+    overflow-x: hidden;
   }
 
 
-  /* DASHBOARD */
-
-  .grid {
-    grid-template-columns: 1fr;
-
-    gap: 14px;
-  }
-
-  .grid article {
-    padding: 20px;
-  }
-
-  .grid strong {
-    font-size: 30px;
-  }
-
-
-  /* PRODUCT FORM */
+  /* -------------------------------------------------------
+     PRODUCT FORM
+  ------------------------------------------------------- */
 
   .row {
     grid-template-columns: 1fr;
 
-    gap: 8px;
-  }
-
-  .row button {
-    width: 100%;
-
-    min-height: 50px;
+    gap: 4px;
   }
 
 
-  /* TABLE */
-
-  table {
-    min-width: 600px;
-  }
-
-
-  /* PAGE HEADING */
+  /* -------------------------------------------------------
+     PAGE HEADING
+  ------------------------------------------------------- */
 
   .page-heading {
     display: block;
+
+    margin-bottom: 24px;
   }
 
   .queue-count {
     display: inline-block;
 
-    margin-top: 14px;
+    margin-top: 12px;
   }
 
 
-  /* PROPOSALS */
+  /* -------------------------------------------------------
+     AI ORDER PROPOSAL
+  ------------------------------------------------------- */
 
   .proposal {
     padding: 18px;
   }
 
   .proposal-top {
-    display: block;
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
   }
 
   .confidence {
     text-align: left;
-
-    margin-top: 18px;
   }
 
-  .proposal h2 {
-    font-size: 21px;
+  .confidence strong {
+    display: inline;
+
+    margin-right: 6px;
   }
 
   .proposal-facts {
     grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-    gap: 10px;
-  }
-
-  .proposal-facts > div {
-    padding: 12px 10px;
+      repeat(2, 1fr);
   }
 
 
-  /* REVIEW */
+  /* -------------------------------------------------------
+     REVIEW CONTROLS
+  ------------------------------------------------------- */
 
   .review-controls {
     display: grid;
 
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+      1fr 1fr;
 
-    gap: 10px;
+    gap: 8px;
+
+    align-items: stretch;
   }
 
   .review-controls input {
     grid-column: 1 / -1;
 
-    min-height: 50px;
+    width: 100%;
   }
 
   .review-controls button {
     width: 100%;
 
-    min-height: 48px;
+    margin: 0;
   }
 
 
-  /* AUTH */
+  /* -------------------------------------------------------
+     TABLE — HORIZONTAL SCROLL
+  ------------------------------------------------------- */
+
+  table {
+    display: block;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    white-space: nowrap;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES — MAX 480px
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .mobile-header {
+    height: 56px;
+
+    padding: 0 12px;
+  }
+
+  .hamburger {
+    width: 40px;
+    height: 40px;
+  }
+
+  .content {
+    padding:
+      72px
+      14px
+      20px;
+  }
 
   .auth {
     padding: 16px;
   }
 
   .auth form {
-    padding: 26px 20px;
+    width: 100%;
+
+    padding: 24px;
   }
 
-  .auth h1 {
-    font-size: 30px;
+  .grid {
+    grid-template-columns: 1fr;
   }
 
+  .proposal-facts {
+    grid-template-columns: 1fr 1fr;
 
-  /* GENERAL MOBILE CONTROLS */
-
-  input,
-  textarea {
-    font-size: 16px;
+    gap: 10px;
   }
 
-  button {
-    min-height: 46px;
-    font-size: 15px;
+  .proposal-facts div {
+    min-width: 0;
   }
 
-  pre {
-    font-size: 12px;
-    padding: 14px;
+  .review-controls {
+    grid-template-columns: 1fr;
   }
+
+  .review-controls input {
+    grid-column: auto;
+  }
+
+  .empty {
+    padding: 28px 18px;
+  }
+
 }
 
 
 /* =========================================================
-   SMALL PHONES
+   VERY SMALL PHONES — MAX 360px
 ========================================================= */
 
-@media (max-width: 400px) {
+@media (max-width: 360px) {
 
   .content {
     padding-left: 12px;
     padding-right: 12px;
-  }
-
-  .content h1 {
-    font-size: 25px;
   }
 
   .proposal {
@@ -1011,11 +1154,4 @@ pre {
     grid-template-columns: 1fr;
   }
 
-  .review-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .review-controls input {
-    grid-column: auto;
-  }
 }
