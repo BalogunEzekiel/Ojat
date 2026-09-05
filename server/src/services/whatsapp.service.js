@@ -1,42 +1,85 @@
 import axios from "axios";
 import { env } from "../config/env.js";
 
-const GRAPH_API_VERSION = "v23.0";
+
+/* =========================================================
+   META WHATSAPP API
+========================================================= */
+
+function getWhatsAppConfig() {
+  if (!env.whatsappToken) {
+    throw Object.assign(
+      new Error("WhatsApp access token is not configured"),
+      { status: 503 }
+    );
+  }
+
+  if (!env.whatsappPhoneId) {
+    throw Object.assign(
+      new Error("WhatsApp phone number ID is not configured"),
+      { status: 503 }
+    );
+  }
+
+  return {
+    token: env.whatsappToken,
+    phoneNumberId: env.whatsappPhoneId,
+    graphVersion: env.whatsappGraphVersion,
+  };
+}
+
+
+/* =========================================================
+   SEND TEXT MESSAGE
+========================================================= */
 
 export async function sendWhatsAppText({
   to,
   message,
 }) {
-  if (
-    !env.whatsappToken ||
-    !env.whatsappPhoneId
-  ) {
-    throw new Error(
-      "WhatsApp integration is not configured"
-    );
+  if (!to) {
+    throw new Error("WhatsApp recipient is required");
   }
 
-  const url =
-    `https://graph.facebook.com/${GRAPH_API_VERSION}/` +
-    `${env.whatsappPhoneId}/messages`;
+  if (!message) {
+    throw new Error("WhatsApp message cannot be empty");
+  }
 
-  const response = await axios.post(
-    url,
-    {
-      messaging_product: "whatsapp",
-      to,
-      type: "text",
-      text: {
-        body: message,
+  const {
+    token,
+    phoneNumberId,
+    graphVersion,
+  } = getWhatsAppConfig();
+
+  const url =
+    `https://graph.facebook.com/${graphVersion}/${phoneNumberId}/messages`;
+
+  const response =
+    await axios.post(
+      url,
+      {
+        messaging_product: "whatsapp",
+
+        recipient_type: "individual",
+
+        to,
+
+        type: "text",
+
+        text: {
+          preview_url: true,
+          body: message,
+        },
       },
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${env.whatsappToken}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+
+        timeout: 15000,
+      }
+    );
 
   return response.data;
 }
