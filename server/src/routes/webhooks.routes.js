@@ -11,6 +11,10 @@ import {
 } from "../lib/prisma.js";
 
 import {
+  verifyMetaSignature,
+} from "../middleware/metaWebhook.js";
+
+import {
   verifyPaystackWebhook,
 } from "../middleware/paystackWebhook.js";
 
