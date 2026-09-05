@@ -6,8 +6,13 @@
   box-sizing: border-box;
 }
 
-html {
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
   min-height: 100%;
+  margin: 0;
 }
 
 body {
@@ -139,10 +144,11 @@ textarea {
 
 .layout {
   display: flex;
-
+  width: 100%;
+  min-width: 0;
   min-height: 100vh;
+  min-height: 100dvh;
 }
-
 
 /* =========================================================
    SIDEBAR
@@ -721,10 +727,11 @@ pre {
 
   .layout {
     display: block;
-
+    width: 100%;
+    min-width: 0;
     min-height: 100vh;
+    min-height: 100dvh;
   }
-
 
   /* -------------------------------------------------------
      MOBILE HEADER
