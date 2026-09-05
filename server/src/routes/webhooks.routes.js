@@ -597,7 +597,7 @@ r.post(
             ===================================== */
 
             console.log(
-              `WhatsApp message processed successfully: ${eventId}`
+              `WhatsApp message queued successfully: ${eventId}`
             );
 
           }
