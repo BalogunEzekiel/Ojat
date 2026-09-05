@@ -85,8 +85,7 @@ export function verifyPaystackWebhook(
         });
     }
 
-
-    if (!req.rawBody) {
+    if (!Buffer.isBuffer(req.rawBody)) {
 
       console.error(
         "Paystack webhook rejected: raw request body unavailable"
