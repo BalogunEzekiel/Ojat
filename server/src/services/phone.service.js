@@ -1,56 +1,129 @@
 /* =========================================================
-   PHONE NORMALIZATION SERVICE
-   Canonical format:
+   OJAT PHONE NORMALIZATION SERVICE
+
+   Canonical Nigerian format:
+
+   08012345678
+       ↓
+   +2348012345678
+
+   2348012345678
+       ↓
+   +2348012345678
+
+   +2348012345678
+       ↓
    +2348012345678
 ========================================================= */
 
 export function normalizePhone(phone) {
-  if (phone === null || phone === undefined) {
+
+  if (
+    phone === null ||
+    phone === undefined
+  ) {
     return null;
   }
 
-  let value = String(phone).trim();
+
+  let value =
+    String(phone)
+      .trim()
+      .replace(/[^\d+]/g, "");
+
 
   if (!value) {
     return null;
   }
 
-  // Remove spaces, hyphens, parentheses and other formatting.
-  value = value.replace(/[^\d+]/g, "");
 
-  // Nigerian local format:
-  // 08012345678 -> +2348012345678
-  if (/^0\d{10}$/.test(value)) {
-    return `+234${value.slice(1)}`;
+  /* =========================================
+     NIGERIAN LOCAL FORMAT
+
+     08012345678
+     07012345678
+     08112345678
+     etc.
+  ========================================= */
+
+  if (
+    /^0\d{10}$/.test(value)
+  ) {
+
+    return (
+      "+234" +
+      value.slice(1)
+    );
+
   }
 
-  // Nigerian international format without "+":
-  // 2348012345678 -> +2348012345678
-  if (/^234\d{10}$/.test(value)) {
-    return `+${value}`;
+
+  /* =========================================
+     NIGERIAN INTERNATIONAL FORMAT
+     WITHOUT +
+
+     2348012345678
+  ========================================= */
+
+  if (
+    /^234\d{10}$/.test(value)
+  ) {
+
+    return (
+      "+" +
+      value
+    );
+
   }
 
-  // Already canonical:
-  // +2348012345678 -> +2348012345678
-  if (/^\+234\d{10}$/.test(value)) {
+
+  /* =========================================
+     NIGERIAN INTERNATIONAL FORMAT
+     WITH +
+
+     +2348012345678
+  ========================================= */
+
+  if (
+    /^\+234\d{10}$/.test(value)
+  ) {
+
     return value;
+
   }
+
+
+  /* =========================================
+     OTHER INTERNATIONAL NUMBERS
+
+     Preserve already formatted international
+     numbers instead of corrupting them.
+  ========================================= */
+
+  if (
+    /^\+\d{7,15}$/.test(value)
+  ) {
+
+    return value;
+
+  }
+
 
   /*
-   * Preserve valid international numbers that already
-   * contain "+" rather than corrupting them.
+   * Digits-only international number.
+   *
+   * Example:
+   * 14155552671 -> +14155552671
    */
-  if (value.startsWith("+")) {
-    return value;
+
+  if (
+    /^\d{7,15}$/.test(value)
+  ) {
+
+    return "+" + value;
+
   }
 
-  /*
-   * For other international numbers without "+",
-   * normalize by adding "+".
-   */
-  if (/^\d+$/.test(value)) {
-    return `+${value}`;
-  }
 
   return null;
 }
