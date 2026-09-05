@@ -1,5 +1,6 @@
+```css
 /* =========================================================
-   OJAT AI — GLOBAL STYLES
+   RESET & BASE
 ========================================================= */
 
 * {
@@ -8,6 +9,7 @@
 
 html {
   min-height: 100%;
+  font-size: 16px;
 }
 
 body {
@@ -15,10 +17,19 @@ body {
   min-width: 320px;
   min-height: 100vh;
 
-  font-family: Inter, Arial, sans-serif;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Arial,
+    sans-serif;
 
   background: #f5f7fb;
   color: #182230;
+
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -31,27 +42,28 @@ button {
   cursor: pointer;
 
   background: #126b4a;
-  color: white;
+  color: #ffffff;
 
   border: 0;
-  border-radius: 8px;
+  border-radius: 9px;
 
-  padding: 11px 16px;
+  padding: 12px 18px;
 
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 14px;
 
   transition:
-    background 0.2s ease,
     opacity 0.2s ease,
-    transform 0.1s ease;
+    transform 0.15s ease,
+    background 0.2s ease;
 }
 
 button:hover:not(:disabled) {
-  background: #0e5a3e;
+  background: #0d573c;
 }
 
 button:active:not(:disabled) {
-  transform: translateY(1px);
+  transform: scale(0.98);
 }
 
 button:disabled {
@@ -63,37 +75,37 @@ input,
 textarea {
   width: 100%;
 
-  padding: 12px;
+  padding: 12px 14px;
 
   border: 1px solid #d7dce5;
-  border-radius: 8px;
+  border-radius: 9px;
 
   margin: 6px 0;
 
-  background: #fff;
+  background: #ffffff;
   color: #182230;
 
   outline: none;
 
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  font-size: 15px;
 }
 
 input:focus,
 textarea:focus {
   border-color: #126b4a;
 
-  box-shadow: 0 0 0 3px rgba(18, 107, 74, 0.1);
+  box-shadow:
+    0 0 0 3px rgba(18, 107, 74, 0.1);
 }
 
 textarea {
   resize: vertical;
+  min-height: 120px;
 }
 
 
 /* =========================================================
-   AUTH / LOGIN
+   AUTH
 ========================================================= */
 
 .auth {
@@ -102,34 +114,35 @@ textarea {
   display: grid;
   place-items: center;
 
-  padding: 24px;
+  padding: 20px;
 }
 
 .auth form {
-  width: min(420px, 90vw);
+  width: min(420px, 100%);
 
   padding: 32px;
 
-  background: white;
+  background: #ffffff;
 
-  border-radius: 16px;
+  border-radius: 18px;
 
-  box-shadow: 0 12px 40px #0001;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.08);
 }
 
 .auth h1 {
   margin: 0 0 8px;
+  font-size: 32px;
 }
 
 .auth p {
   margin: 0 0 24px;
-
   color: #667085;
 }
 
 .auth button {
   width: 100%;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 
@@ -140,6 +153,7 @@ textarea {
 .layout {
   display: flex;
 
+  width: 100%;
   min-height: 100vh;
 }
 
@@ -149,57 +163,34 @@ textarea {
 ========================================================= */
 
 .layout aside {
-  width: 240px;
+  width: 250px;
+  flex-shrink: 0;
+
   height: 100vh;
 
   position: sticky;
   top: 0;
 
-  flex-shrink: 0;
-
-  padding: 24px;
-
-  background: #10251d;
-  color: white;
-
   display: flex;
   flex-direction: column;
+
+  padding: 22px 16px;
+
+  background: #10251d;
+  color: #ffffff;
 
   overflow: hidden;
 }
 
+.layout aside h2 {
+  margin: 0;
 
-/* =========================================================
-   SIDEBAR TOP
-========================================================= */
+  padding: 4px 10px 20px;
 
-.sidebar-top {
-  flex: 1;
-
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-}
-
-
-/* =========================================================
-   SIDEBAR BRAND
-========================================================= */
-
-.sidebar-brand {
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
+  font-size: 25px;
+  font-weight: 800;
 
   flex-shrink: 0;
-}
-
-.sidebar-brand h2 {
-  margin: 0 0 24px;
-
-  font-size: 24px;
 }
 
 
@@ -213,64 +204,62 @@ textarea {
 
   gap: 6px;
 
-  min-height: 0;
+  flex: 1;
 
   overflow-y: auto;
 
-  padding-right: 4px;
+  padding: 4px 2px;
 
   scrollbar-width: thin;
 }
 
 .sidebar-nav a {
+  display: flex;
+  align-items: center;
+
+  min-height: 44px;
+
+  padding: 11px 13px;
+
   color: #d9eee5;
 
   text-decoration: none;
 
-  padding: 11px 10px;
+  border-radius: 9px;
 
-  border-radius: 8px;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease;
-}
-
-.sidebar-nav a {
-  color: #d9eee5;
-
-  text-decoration: none;
-
-  padding: 11px 10px;
-
-  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
 
   transition:
     background 0.2s ease,
-    color 0.2s ease;
+    color 0.2s ease,
+    transform 0.15s ease;
+
+  flex-shrink: 0;
 }
 
 .sidebar-nav a:hover {
   background: #1b3a2f;
-  color: white;
+  color: #ffffff;
 }
+
+
+/* ACTIVE TAB */
 
 .sidebar-nav a.active {
   background: #126b4a;
-  color: white;
+
+  color: #ffffff;
 
   font-weight: 700;
 
   box-shadow:
-    inset 3px 0 0 white;
+    inset 4px 0 0 #ffffff,
+    0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .sidebar-nav a.active:hover {
   background: #16835a;
-}
-
-.sidebar-nav a:active {
-  background: #24503f;
 }
 
 
@@ -278,45 +267,20 @@ textarea {
    SIDEBAR LOGOUT
 ========================================================= */
 
-.sidebar-logout {
+.layout aside > button {
   width: 100%;
-
-  margin-top: 20px;
 
   flex-shrink: 0;
 
-  background: #126b4a;
+  margin-top: 16px;
+
+  background: #8f2d24;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.sidebar-logout:hover {
-  background: #16835a;
-}
-
-
-/* =========================================================
-   SIDEBAR CLOSE BUTTON
-========================================================= */
-
-.sidebar-close {
-  display: none;
-}
-
-
-/* =========================================================
-   MOBILE HEADER
-========================================================= */
-
-.mobile-header {
-  display: none;
-}
-
-
-/* =========================================================
-   SIDEBAR OVERLAY
-========================================================= */
-
-.sidebar-overlay {
-  display: none;
+.layout aside > button:hover {
+  background: #b42318;
 }
 
 
@@ -336,6 +300,13 @@ textarea {
 
 .content h1 {
   margin-top: 0;
+
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.2;
+}
+
+.content h2 {
+  line-height: 1.3;
 }
 
 
@@ -347,19 +318,22 @@ textarea {
   display: grid;
 
   grid-template-columns:
-    repeat(auto-fit, minmax(180px, 1fr));
+    repeat(auto-fit, minmax(200px, 1fr));
 
   gap: 18px;
 }
 
 .grid article {
-  background: white;
+  min-width: 0;
+
+  background: #ffffff;
 
   padding: 24px;
 
   border-radius: 14px;
 
-  box-shadow: 0 3px 12px #0000000c;
+  box-shadow:
+    0 3px 12px rgba(0, 0, 0, 0.05);
 }
 
 .grid span {
@@ -368,37 +342,49 @@ textarea {
   color: #667085;
 
   text-transform: capitalize;
+
+  font-size: 14px;
 }
 
 .grid strong {
   display: block;
 
-  font-size: 28px;
+  font-size: clamp(26px, 4vw, 32px);
 
   margin-top: 8px;
+
+  overflow-wrap: anywhere;
 }
 
 
 /* =========================================================
-   FORMS / PRODUCT ROW
+   PRODUCT FORM
 ========================================================= */
 
 .row {
   display: grid;
 
   grid-template-columns:
-    repeat(5, 1fr);
+    repeat(5, minmax(120px, 1fr));
 
-  gap: 8px;
+  gap: 10px;
 
   align-items: center;
 
   margin-bottom: 24px;
 }
 
+.row input {
+  min-width: 0;
+}
+
+.row button {
+  white-space: nowrap;
+}
+
 
 /* =========================================================
-   TABLE
+   TABLES
 ========================================================= */
 
 table {
@@ -406,7 +392,7 @@ table {
 
   border-collapse: collapse;
 
-  background: white;
+  background: #ffffff;
 
   border-radius: 12px;
 
@@ -417,21 +403,23 @@ th,
 td {
   text-align: left;
 
-  padding: 14px;
+  padding: 15px;
 
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #edf0f3;
+
+  font-size: 15px;
 }
 
 th {
-  font-size: 13px;
+  background: #f8fafc;
 
   color: #475467;
 
-  background: #f9fafb;
+  font-weight: 700;
 }
 
-tbody tr:last-child td {
-  border-bottom: 0;
+td {
+  white-space: nowrap;
 }
 
 
@@ -440,46 +428,52 @@ tbody tr:last-child td {
 ========================================================= */
 
 .error {
+  margin: 14px 0;
+
+  padding: 13px 15px;
+
+  border-radius: 9px;
+
   background: #fee4e2;
-
-  padding: 10px;
-
-  border-radius: 8px;
 
   color: #b42318;
 
-  margin-bottom: 16px;
+  font-size: 14px;
 }
 
 
 /* =========================================================
-   CODE / AI RESPONSE
+   AI OUTPUT
 ========================================================= */
 
 pre {
+  width: 100%;
+
+  padding: 20px;
+
   background: #111827;
 
   color: #d1fae5;
 
-  padding: 20px;
+  border-radius: 12px;
 
-  border-radius: 10px;
+  overflow-x: auto;
 
-  overflow: auto;
+  font-size: 14px;
 
-  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 
 /* =========================================================
-   AI ORDER PAGE HEADING
+   PAGE HEADING
 ========================================================= */
 
 .page-heading {
   display: flex;
 
   justify-content: space-between;
-
   align-items: flex-start;
 
   gap: 20px;
@@ -487,34 +481,38 @@ pre {
   margin-bottom: 28px;
 }
 
+.page-heading h1 {
+  margin-bottom: 8px;
+}
+
 .eyebrow {
+  margin: 0 0 6px;
+
   color: #126b4a;
 
   font-size: 12px;
 
-  font-weight: 700;
+  font-weight: 800;
 
   letter-spacing: 0.08em;
 
   text-transform: uppercase;
-
-  margin: 0 0 8px;
-}
-
-.page-heading h1 {
-  margin: 0;
 }
 
 .muted {
   color: #667085;
+
+  line-height: 1.6;
 }
 
 .queue-count {
+  flex-shrink: 0;
+
   background: #e5f4ed;
 
   color: #126b4a;
 
-  padding: 10px 14px;
+  padding: 10px 15px;
 
   border-radius: 999px;
 
@@ -531,19 +529,22 @@ pre {
 
   gap: 18px;
 
-  max-width: 900px;
+  width: 100%;
+
+  max-width: 950px;
 }
 
 .proposal {
-  background: #fff;
+  background: #ffffff;
 
   border: 1px solid #e4e8ee;
 
-  border-radius: 14px;
+  border-radius: 16px;
 
   padding: 24px;
 
-  box-shadow: 0 3px 12px #0000000c;
+  box-shadow:
+    0 3px 12px rgba(0, 0, 0, 0.04);
 }
 
 .proposal-top {
@@ -551,33 +552,43 @@ pre {
 
   justify-content: space-between;
 
-  gap: 18px;
+  gap: 20px;
 }
 
 .proposal h2 {
-  margin: 10px 0 4px;
+  margin: 10px 0 5px;
+
+  font-size: 22px;
 }
 
 .status {
+  display: inline-block;
+
+  padding: 5px 8px;
+
   font-size: 11px;
 
-  font-weight: 700;
+  font-weight: 800;
 
   letter-spacing: 0.08em;
 
   color: #126b4a;
+
+  background: #e5f4ed;
+
+  border-radius: 999px;
 }
 
 .confidence {
-  text-align: right;
-
   flex-shrink: 0;
+
+  text-align: right;
 }
 
 .confidence strong {
   display: block;
 
-  font-size: 28px;
+  font-size: 30px;
 
   color: #126b4a;
 }
@@ -591,43 +602,54 @@ pre {
   font-size: 12px;
 }
 
-
-/* =========================================================
-   RAW CUSTOMER MESSAGE
-========================================================= */
-
 .proposal blockquote {
-  margin: 20px 0;
+  margin: 22px 0;
 
-  padding: 15px 18px;
+  padding: 16px 18px;
 
   background: #f5f7fb;
 
-  border-left: 3px solid #126b4a;
+  border-left: 4px solid #126b4a;
 
   color: #344054;
 
-  border-radius: 0 8px 8px 0;
+  line-height: 1.6;
+
+  overflow-wrap: anywhere;
 }
 
 
 /* =========================================================
-   AI ORDER FACTS
+   PROPOSAL FACTS
 ========================================================= */
 
 .proposal-facts {
   display: grid;
 
   grid-template-columns:
-    repeat(4, 1fr);
+    repeat(4, minmax(0, 1fr));
 
   gap: 12px;
+}
+
+.proposal-facts > div {
+  min-width: 0;
+
+  padding: 12px;
+
+  background: #f8fafc;
+
+  border-radius: 10px;
 }
 
 .proposal-facts strong {
   display: block;
 
-  margin-top: 5px;
+  margin-top: 6px;
+
+  font-size: 17px;
+
+  overflow-wrap: anywhere;
 }
 
 
@@ -638,7 +660,7 @@ pre {
 .review-controls {
   display: flex;
 
-  gap: 8px;
+  gap: 10px;
 
   align-items: center;
 
@@ -646,9 +668,11 @@ pre {
 }
 
 .review-controls input {
-  margin: 0;
+  flex: 1;
 
   min-width: 0;
+
+  margin: 0;
 }
 
 .review-controls button {
@@ -660,7 +684,7 @@ pre {
 }
 
 .review-controls .reject:hover:not(:disabled) {
-  background: #912018;
+  background: #8f1c13;
 }
 
 
@@ -669,13 +693,15 @@ pre {
 ========================================================= */
 
 .empty {
-  background: #fff;
-
-  border-radius: 14px;
-
-  padding: 40px;
+  width: 100%;
 
   max-width: 900px;
+
+  background: #ffffff;
+
+  border-radius: 16px;
+
+  padding: 48px 30px;
 
   text-align: center;
 }
@@ -686,464 +712,296 @@ pre {
 
 
 /* =========================================================
+   TABLE RESPONSIVE WRAPPER
+========================================================= */
+
+.content {
+  overflow-x: auto;
+}
+
+
+/* =========================================================
    TABLET
 ========================================================= */
 
 @media (max-width: 1000px) {
 
-  .layout aside {
-    width: 210px;
-
-    padding: 20px;
-  }
-
   .content {
-    padding: 28px;
+    padding: 28px 24px;
   }
 
   .row {
     grid-template-columns:
-      repeat(2, 1fr);
+      repeat(3, minmax(0, 1fr));
   }
 
+  .proposal-facts {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
 }
 
 
 /* =========================================================
-   MOBILE — MAX 760px
+   MOBILE
 ========================================================= */
 
 @media (max-width: 760px) {
 
-  /* -------------------------------------------------------
-     MAIN LAYOUT
-  ------------------------------------------------------- */
-
-  .layout {
-    display: block;
-
-    min-height: 100vh;
+  html {
+    font-size: 17px;
   }
 
-
-  /* -------------------------------------------------------
-     MOBILE HEADER
-  ------------------------------------------------------- */
-
-  .mobile-header {
-    position: fixed;
-
-    top: 0;
-    left: 0;
-    right: 0;
-
-    height: 60px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 14px;
-
-    padding: 0 16px;
-
-    background: white;
-
-    border-bottom: 1px solid #e4e8ee;
-
-    z-index: 1000;
-  }
-
-  .mobile-header strong {
-    font-size: 18px;
-
-    color: #10251d;
-  }
-
-
-  /* -------------------------------------------------------
-     HAMBURGER
-  ------------------------------------------------------- */
-
-  .hamburger {
-    width: 42px;
-    height: 42px;
-
-    padding: 8px;
-
-    margin: 0;
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-
-    align-items: center;
-
-    gap: 5px;
-
-    background: #10251d;
-
-    border-radius: 8px;
-  }
-
-  .hamburger:hover {
-    background: #1b3a2f;
-  }
-
-  .hamburger span {
-    display: block;
-
-    width: 22px;
-    height: 2px;
-
-    background: white;
-
-    border-radius: 2px;
-  }
-
-
-  /* -------------------------------------------------------
-     MOBILE SIDEBAR DRAWER
-  ------------------------------------------------------- */
-
-  .layout aside {
-    position: fixed;
-
-    top: 0;
-    left: 0;
-
-    width: min(280px, 85vw);
-
-    height: 100dvh;
-
-    padding: 20px;
-
-    z-index: 1100;
-
-    transform: translateX(-100%);
-
-    transition:
-      transform 0.25s ease;
-
-    box-shadow:
-      8px 0 30px rgba(0, 0, 0, 0.18);
-
-    overflow: hidden;
-  }
-
-  .layout aside.sidebar-open {
-    transform: translateX(0);
-  }
-
-
-  /* -------------------------------------------------------
-     MOBILE SIDEBAR BRAND
-  ------------------------------------------------------- */
-
-  .sidebar-brand {
-    min-height: 42px;
-  }
-
-  .sidebar-brand h2 {
-    margin: 0;
-
-    font-size: 23px;
-  }
-
-
-  /* -------------------------------------------------------
-     CLOSE BUTTON
-  ------------------------------------------------------- */
-
-  .sidebar-close {
-    display: flex;
-
-    width: 38px;
-    height: 38px;
-
-    padding: 0;
-    margin: 0;
-
-    align-items: center;
-    justify-content: center;
-
-    background: transparent;
-
-    color: white;
-
-    font-size: 30px;
-
-    font-weight: 300;
-
-    line-height: 1;
-
-    border-radius: 8px;
-  }
-
-  .sidebar-close:hover {
-    background: #1b3a2f;
-  }
-
-
-  /* -------------------------------------------------------
-     MOBILE NAVIGATION
-  ------------------------------------------------------- */
-
-  .sidebar-nav {
-    margin-top: 24px;
-
-    gap: 6px;
-
-    overflow-y: auto;
-
-    min-height: 0;
-
-    /*
-      The navigation gets its own scroll area.
-      It can never force the sidebar beyond
-      the phone viewport.
-    */
-    max-height: calc(100dvh - 150px);
-  }
-
-  .sidebar-nav a {
-    padding: 12px 10px;
-  }
-
-
-  /* -------------------------------------------------------
-     MOBILE LOGOUT
-  ------------------------------------------------------- */
-
-  .sidebar-logout {
-    margin-top: 14px;
-  }
-
-
-  /* -------------------------------------------------------
-     DARK OVERLAY
-  ------------------------------------------------------- */
-
-  .sidebar-overlay {
-    display: block;
-
-    position: fixed;
-
-    inset: 0;
-
-    width: 100%;
-    height: 100%;
-
-    padding: 0;
-
-    margin: 0;
-
-    border: 0;
-
-    border-radius: 0;
-
-    z-index: 1050;
-
-    background: rgba(0, 0, 0, 0.45);
-
-    cursor: pointer;
-  }
-
-
-  /* -------------------------------------------------------
-     MAIN CONTENT
-  ------------------------------------------------------- */
-
-  .content {
-    width: 100%;
-
-    min-width: 0;
-
-    padding: 80px 20px 24px;
-
+  body {
     overflow-x: hidden;
   }
 
 
-  /* -------------------------------------------------------
-     PRODUCT FORM
-  ------------------------------------------------------- */
+  /* LAYOUT */
+
+  .layout {
+    display: block;
+
+    min-height: 100dvh;
+  }
+
+
+  /* SIDEBAR */
+
+  .layout aside {
+    width: 100%;
+
+    height: 100dvh;
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    z-index: 1000;
+
+    padding:
+      calc(16px + env(safe-area-inset-top))
+      16px
+      calc(16px + env(safe-area-inset-bottom));
+
+    transform: translateX(-100%);
+
+    transition: transform 0.25s ease;
+
+    box-shadow:
+      8px 0 30px rgba(0, 0, 0, 0.25);
+  }
+
+  .layout aside.open {
+    transform: translateX(0);
+  }
+
+  .layout aside h2 {
+    padding-bottom: 14px;
+  }
+
+
+  /* SIDEBAR NAV */
+
+  .sidebar-nav {
+    gap: 8px;
+
+    min-height: 0;
+
+    padding-bottom: 12px;
+  }
+
+  .sidebar-nav a {
+    min-height: 50px;
+
+    padding: 13px 15px;
+
+    font-size: 16px;
+  }
+
+
+  /* LOGOUT ALWAYS INSIDE VIEWPORT */
+
+  .layout aside > button {
+    min-height: 48px;
+
+    margin-top: 10px;
+  }
+
+
+  /* CONTENT */
+
+  .content {
+    width: 100%;
+
+    min-height: 100dvh;
+
+    padding:
+      80px 16px 28px;
+
+    overflow-x: auto;
+  }
+
+  .content h1 {
+    font-size: 28px;
+  }
+
+
+  /* DASHBOARD */
+
+  .grid {
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+  }
+
+  .grid article {
+    padding: 20px;
+  }
+
+  .grid strong {
+    font-size: 30px;
+  }
+
+
+  /* PRODUCT FORM */
 
   .row {
     grid-template-columns: 1fr;
 
-    gap: 4px;
+    gap: 8px;
+  }
+
+  .row button {
+    width: 100%;
+
+    min-height: 50px;
   }
 
 
-  /* -------------------------------------------------------
-     PAGE HEADING
-  ------------------------------------------------------- */
+  /* TABLE */
+
+  table {
+    min-width: 600px;
+  }
+
+
+  /* PAGE HEADING */
 
   .page-heading {
     display: block;
-
-    margin-bottom: 24px;
   }
 
   .queue-count {
     display: inline-block;
 
-    margin-top: 12px;
+    margin-top: 14px;
   }
 
 
-  /* -------------------------------------------------------
-     AI ORDER PROPOSAL
-  ------------------------------------------------------- */
+  /* PROPOSALS */
 
   .proposal {
     padding: 18px;
   }
 
   .proposal-top {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 12px;
+    display: block;
   }
 
   .confidence {
     text-align: left;
+
+    margin-top: 18px;
   }
 
-  .confidence strong {
-    display: inline;
-
-    margin-right: 6px;
+  .proposal h2 {
+    font-size: 21px;
   }
 
   .proposal-facts {
     grid-template-columns:
-      repeat(2, 1fr);
+      repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+  }
+
+  .proposal-facts > div {
+    padding: 12px 10px;
   }
 
 
-  /* -------------------------------------------------------
-     REVIEW CONTROLS
-  ------------------------------------------------------- */
+  /* REVIEW */
 
   .review-controls {
     display: grid;
 
-    grid-template-columns:
-      1fr 1fr;
+    grid-template-columns: 1fr 1fr;
 
-    gap: 8px;
-
-    align-items: stretch;
+    gap: 10px;
   }
 
   .review-controls input {
     grid-column: 1 / -1;
 
-    width: 100%;
+    min-height: 50px;
   }
 
   .review-controls button {
     width: 100%;
 
-    margin: 0;
+    min-height: 48px;
   }
 
 
-  /* -------------------------------------------------------
-     TABLE — HORIZONTAL SCROLL
-  ------------------------------------------------------- */
-
-  table {
-    display: block;
-
-    width: 100%;
-
-    overflow-x: auto;
-
-    white-space: nowrap;
-  }
-
-}
-
-
-/* =========================================================
-   SMALL PHONES — MAX 480px
-========================================================= */
-
-@media (max-width: 480px) {
-
-  .mobile-header {
-    height: 56px;
-
-    padding: 0 12px;
-  }
-
-  .hamburger {
-    width: 40px;
-    height: 40px;
-  }
-
-  .content {
-    padding:
-      72px
-      14px
-      20px;
-  }
+  /* AUTH */
 
   .auth {
     padding: 16px;
   }
 
   .auth form {
-    width: 100%;
-
-    padding: 24px;
+    padding: 26px 20px;
   }
 
-  .grid {
-    grid-template-columns: 1fr;
+  .auth h1 {
+    font-size: 30px;
   }
 
-  .proposal-facts {
-    grid-template-columns: 1fr 1fr;
 
-    gap: 10px;
+  /* GENERAL MOBILE CONTROLS */
+
+  input,
+  textarea {
+    font-size: 16px;
   }
 
-  .proposal-facts div {
-    min-width: 0;
+  button {
+    min-height: 46px;
+    font-size: 15px;
   }
 
-  .review-controls {
-    grid-template-columns: 1fr;
+  pre {
+    font-size: 12px;
+    padding: 14px;
   }
-
-  .review-controls input {
-    grid-column: auto;
-  }
-
-  .empty {
-    padding: 28px 18px;
-  }
-
 }
 
 
 /* =========================================================
-   VERY SMALL PHONES — MAX 360px
+   SMALL PHONES
 ========================================================= */
 
-@media (max-width: 360px) {
+@media (max-width: 400px) {
 
   .content {
     padding-left: 12px;
     padding-right: 12px;
+  }
+
+  .content h1 {
+    font-size: 25px;
   }
 
   .proposal {
@@ -1154,4 +1012,12 @@ pre {
     grid-template-columns: 1fr;
   }
 
+  .review-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .review-controls input {
+    grid-column: auto;
+  }
 }
+```
