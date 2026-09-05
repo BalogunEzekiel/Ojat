@@ -31,6 +31,14 @@ enum MessageType {
   SYSTEM
 }
 
+enum MessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
 enum OrderStatus {
   DRAFT
   PENDING
@@ -298,7 +306,20 @@ model Message {
   transcription  String?
   rawPayload     Json?
 
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  // Message delivery lifecycle
+  status         MessageStatus    @default(PENDING)
+
+  // Prevent duplicate message processing
+  idempotencyKey String?          @unique
+
+  // Store failure reason when delivery/processing fails
+  errorMessage   String?
+
+  conversation Conversation @relation(
+    fields: [conversationId],
+    references: [id],
+    onDelete: Cascade
+  )
 
   createdAt DateTime @default(now())
 
