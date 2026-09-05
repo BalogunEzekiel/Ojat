@@ -82,6 +82,8 @@ r.get(
 r.post(
   "/whatsapp",
 
+  verifyMetaSignature,
+
   async (
     req,
     res,
@@ -169,10 +171,10 @@ r.post(
 
 
             /* =====================================
-               IDEMPOTENCY CHECK
+               FIND WEBHOOK EVENT
             ===================================== */
 
-            const existingEvent =
+            let webhookEvent =
               await prisma.webhookEvent.findUnique({
 
                 where: {
@@ -182,10 +184,16 @@ r.post(
               });
 
 
-            if (existingEvent) {
+            /* =====================================
+               ALREADY SUCCESSFULLY PROCESSED
+            ===================================== */
+
+            if (
+              webhookEvent?.processed
+            ) {
 
               console.log(
-                `Duplicate webhook ignored: ${eventId}`
+                `Duplicate processed WhatsApp webhook ignored: ${eventId}`
               );
 
               continue;
@@ -194,56 +202,104 @@ r.post(
 
 
             /* =====================================
-               STORE WEBHOOK EVENT
+               CREATE OR REUSE WEBHOOK EVENT
+
+               Important:
+
+               processed=false means the event is
+               still eligible for retry.
             ===================================== */
 
-            try {
+            if (!webhookEvent) {
 
-              await prisma.webhookEvent.create({
+              try {
 
-                data: {
+                webhookEvent =
+                  await prisma.webhookEvent.create({
 
-                  provider:
-                    "WHATSAPP",
+                    data: {
 
-                  eventId,
+                      provider:
+                        "WHATSAPP",
 
-                  payload,
+                      eventId,
 
-                  processed:
-                    false,
+                      payload,
 
-                },
+                      processed:
+                        false,
 
-              });
+                    },
 
-            } catch (error) {
+                  });
 
-              /*
-               * Unique constraint race condition.
-               * Another request may have already
-               * inserted this event.
-               */
+              } catch (error) {
 
-              if (
-                error.code === "P2002"
-              ) {
-                continue;
+                /*
+                 * Another request may have inserted
+                 * the same event concurrently.
+                 */
+
+                if (
+                  error?.code === "P2002"
+                ) {
+
+                  webhookEvent =
+                    await prisma.webhookEvent.findUnique({
+
+                      where: {
+                        eventId,
+                      },
+
+                    });
+
+
+                  /*
+                   * If the other request has already
+                   * completed processing, do nothing.
+                   */
+
+                  if (
+                    webhookEvent?.processed
+                  ) {
+
+                    console.log(
+                      `WhatsApp webhook completed by concurrent request: ${eventId}`
+                    );
+
+                    continue;
+
+                  }
+
+
+                  /*
+                   * Otherwise continue processing the
+                   * existing unprocessed event.
+                   */
+
+                } else {
+
+                  throw error;
+
+                }
+
               }
-
-              throw error;
 
             }
 
+
             /* =====================================
-              CUSTOMER IDENTITY
+               CUSTOMER IDENTITY
             ===================================== */
 
             const rawPhone =
               incomingMessage.from;
 
+
             const phone =
-              normalizePhone(rawPhone);
+              normalizePhone(
+                rawPhone
+              );
 
 
             if (!phone) {
@@ -253,6 +309,14 @@ r.post(
                 rawPhone
               );
 
+              /*
+               * Do not mark this as processed.
+               *
+               * If the payload is malformed, keeping
+               * processed=false makes investigation/
+               * retry possible.
+               */
+
               continue;
 
             }
@@ -261,13 +325,16 @@ r.post(
             const contact =
               value.contacts?.find(
                 item =>
-                  normalizePhone(item.wa_id) === phone
+                  normalizePhone(
+                    item.wa_id
+                  ) === phone
               );
 
 
             const customerName =
               contact?.profile?.name ||
               null;
+
 
             /* =====================================
                FIND OR CREATE CUSTOMER
@@ -409,32 +476,23 @@ r.post(
 
 
             /* =====================================
-               STORE MESSAGE
+               FIND EXISTING MESSAGE
+
+               This protects retries where the
+               message was successfully created but
+               processing failed afterwards.
             ===================================== */
 
-            const message =
-              await prisma.message.create({
+            let message =
+              await prisma.message.findFirst({
 
-                data: {
-
-                  conversationId:
-                    conversation.id,
+                where: {
 
                   externalId:
                     eventId,
 
-                  direction:
-                    "INBOUND",
-
-                  type:
-                    messageType,
-
-                  content:
-                    incomingMessage.text?.body ||
-                    null,
-
-                  rawPayload:
-                    incomingMessage,
+                  conversationId:
+                    conversation.id,
 
                 },
 
@@ -442,11 +500,48 @@ r.post(
 
 
             /* =====================================
+               CREATE MESSAGE ONLY IF NECESSARY
+            ===================================== */
+
+            if (!message) {
+
+              message =
+                await prisma.message.create({
+
+                  data: {
+
+                    conversationId:
+                      conversation.id,
+
+                    externalId:
+                      eventId,
+
+                    direction:
+                      "INBOUND",
+
+                    type:
+                      messageType,
+
+                    content:
+                      incomingMessage.text?.body ||
+                      null,
+
+                    rawPayload:
+                      incomingMessage,
+
+                  },
+
+                });
+
+            }
+
+
+            /* =====================================
                QUEUE MESSAGE
 
-               DO NOT PROCESS AI HERE.
-
-               Meta needs a fast HTTP response.
+               queueWhatsAppMessage MUST use eventId
+               as its BullMQ jobId so a webhook retry
+               cannot create duplicate jobs.
             ===================================== */
 
             await queueWhatsAppMessage({
@@ -493,8 +588,30 @@ r.post(
             });
 
 
+            /* =====================================
+               MARK WEBHOOK EVENT PROCESSED
+            ===================================== */
+
+            await prisma.webhookEvent.update({
+
+              where: {
+
+                eventId,
+
+              },
+
+              data: {
+
+                processed:
+                  true,
+
+              },
+
+            });
+
+
             console.log(
-              `WhatsApp message queued: ${eventId}`
+              `WhatsApp message processed successfully: ${eventId}`
             );
 
           }
@@ -516,6 +633,15 @@ r.post(
         "WhatsApp webhook error:",
         error
       );
+
+      /*
+       * IMPORTANT:
+       *
+       * We intentionally do NOT mark the webhook
+       * event processed here.
+       *
+       * processed=false allows Meta to retry.
+       */
 
       return next(error);
 
