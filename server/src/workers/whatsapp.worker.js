@@ -11,10 +11,6 @@ import {
 } from "../lib/prisma.js";
 
 import {
-  env,
-} from "../config/env.js";
-
-import {
   processCommerceMessage,
 } from "../services/agent.service.js";
 
