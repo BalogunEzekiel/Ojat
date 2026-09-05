@@ -884,3 +884,72 @@ export async function handlePaystackSuccess(
     transaction
   );
 }
+
+/* =========================================================
+   CUSTOMER PAYMENT CONFIRMATION
+========================================================= */
+
+export async function handlePaystackSuccess(reference) {
+  const transaction =
+    await verifyPaystackTransaction(reference);
+
+  const result =
+    await finalizeSuccessfulPayment(
+      reference,
+      transaction
+    );
+
+  if (
+    result.alreadyProcessed ||
+    !result.order
+  ) {
+    return result;
+  }
+
+  const order =
+    result.order;
+
+  const conversation =
+    await prisma.conversation.findFirst({
+      where: {
+        businessId: order.businessId,
+        customerId: order.customerId,
+      },
+
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+
+  if (conversation && order.customer?.phone) {
+    await queueWhatsAppOutbound({
+      businessId:
+        order.businessId,
+
+      conversationId:
+        conversation.id,
+
+      to:
+        order.customer.phone,
+
+      message:
+        `Payment received successfully for order ${order.number}. ` +
+        `Your order is now being processed. Thank you for shopping with us!`,
+
+      idempotencyKey:
+        `payment-success-${result.payment.id}`,
+
+      context: {
+        type: "PAYMENT_SUCCESS",
+
+        orderId:
+          order.id,
+
+        paymentId:
+          result.payment.id,
+      },
+    });
+  }
+
+  return result;
+}
