@@ -22,6 +22,10 @@ import {
   handlePaystackSuccess,
 } from "../services/payment.service.js";
 
+import {
+  normalizePhone,
+} from "../services/phone.service.js";
+
 const r =
   Router();
 
@@ -231,19 +235,22 @@ r.post(
 
             }
 
-
             /* =====================================
-               CUSTOMER IDENTITY
+              CUSTOMER IDENTITY
             ===================================== */
 
-            const phone =
+            const rawPhone =
               incomingMessage.from;
+
+            const phone =
+              normalizePhone(rawPhone);
 
 
             if (!phone) {
 
               console.warn(
-                "Incoming message has no sender"
+                "Incoming WhatsApp message has invalid sender phone:",
+                rawPhone
               );
 
               continue;
@@ -254,14 +261,13 @@ r.post(
             const contact =
               value.contacts?.find(
                 item =>
-                  item.wa_id === phone
+                  normalizePhone(item.wa_id) === phone
               );
 
 
             const customerName =
               contact?.profile?.name ||
               null;
-
 
             /* =====================================
                FIND OR CREATE CUSTOMER
