@@ -95,6 +95,9 @@ export const env = {
   paystackPublic:
     process.env.PAYSTACK_PUBLIC_KEY,
 
+  paystackWebhookSecret:
+    process.env.PAYSTACK_WEBHOOK_SECRET,
+
   // ==========================================
   // CLOUDINARY
   // ==========================================
