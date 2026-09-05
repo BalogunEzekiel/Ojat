@@ -1,5 +1,8 @@
 import { prisma } from "../lib/prisma.js";
 
+import {
+  normalizePhone,
+} from "./phone.service.js";
 
 /* =========================================================
    GENERATE ORDER NUMBER
@@ -20,98 +23,6 @@ function generateOrderNumber() {
 
   return `OJ-${timestamp}-${random}`;
 }
-
-
-/* =========================================================
-   NORMALIZE PHONE NUMBER
-========================================================= */
-
-/*
-  Ojat receives phone numbers from several possible sources:
-
-  08062529172
-  806251172
-  234806251172
-  +234806251172
-
-  We store Nigerian numbers in canonical international form:
-
-  +234806251172
-*/
-
-function normalizePhone(phone) {
-
-  if (
-    phone === null ||
-    phone === undefined
-  ) {
-    return null;
-  }
-
-  let value =
-    String(phone)
-      .trim()
-      .replace(/[^\d+]/g, "");
-
-  if (!value) {
-    return null;
-  }
-
-
-  /* -----------------------------------------
-     Nigerian local format
-
-     080...
-     070...
-     081...
-  ----------------------------------------- */
-
-  if (
-    value.startsWith("0") &&
-    value.length === 11
-  ) {
-    value =
-      "+234" +
-      value.substring(1);
-  }
-
-
-  /* -----------------------------------------
-     Nigerian international format
-
-     234...
-  ----------------------------------------- */
-
-  else if (
-    value.startsWith("234") &&
-    value.length === 13
-  ) {
-    value =
-      "+" +
-      value;
-  }
-
-
-  /* -----------------------------------------
-     Already international
-
-     +234...
-     +1...
-     etc.
-  ----------------------------------------- */
-
-  else if (
-    !value.startsWith("+")
-  ) {
-    value =
-      "+" +
-      value;
-  }
-
-
-  return value;
-}
-
 
 /* =========================================================
    RESOLVE CUSTOMER
