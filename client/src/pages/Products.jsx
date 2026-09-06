@@ -1,12 +1,21 @@
 import {
+  useState,
+} from "react";
+
+import {
   useQuery,
 } from "@tanstack/react-query";
+
+import api from "../lib/api";
+
+import Layout from "../components/Layout";
+
 
 /* =========================================================
    PRODUCTS
 ========================================================= */
 
-function Products() {
+export default function Products() {
   const {
     data: items = [],
     isLoading,
@@ -27,8 +36,14 @@ function Products() {
         : [];
     },
 
-    staleTime: 60 * 1000,
+    staleTime:
+      60 * 1000,
   });
+
+
+  /* =======================================================
+     PRODUCT FORM
+  ======================================================= */
 
   const [form, setForm] =
     useState({
@@ -39,15 +54,22 @@ function Products() {
       minStock: "0",
     });
 
+
   const [
     errorMessage,
     setErrorMessage,
   ] = useState("");
 
+
   const [
     adding,
     setAdding,
   ] = useState(false);
+
+
+  /* =======================================================
+     ADD PRODUCT
+  ======================================================= */
 
   async function add(e) {
     e.preventDefault();
@@ -59,18 +81,29 @@ function Products() {
       await api.post(
         "/products",
         {
-          name: form.name,
-          sku: form.sku,
+          name:
+            form.name,
+
+          sku:
+            form.sku,
+
           sellingPrice:
             Number(
               form.sellingPrice
             ),
+
           quantity:
-            Number(form.quantity),
+            Number(
+              form.quantity
+            ),
+
           minStock:
-            Number(form.minStock),
+            Number(
+              form.minStock
+            ),
         }
       );
+
 
       setForm({
         name: "",
@@ -80,6 +113,7 @@ function Products() {
         minStock: "0",
       });
 
+
       await refetch();
 
     } catch (e) {
@@ -87,10 +121,16 @@ function Products() {
         e.response?.data?.message ||
         "Unable to create product"
       );
+
     } finally {
       setAdding(false);
     }
   }
+
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
 
   return (
     <Layout>
@@ -98,6 +138,9 @@ function Products() {
       <h1>
         Products & Inventory
       </h1>
+
+
+      {/* ERROR */}
 
       {(errorMessage ||
         isError) && (
@@ -107,6 +150,9 @@ function Products() {
             "Unable to load products"}
         </div>
       )}
+
+
+      {/* ADD PRODUCT FORM */}
 
       <form
         className="row"
@@ -129,12 +175,12 @@ function Products() {
               required={
                 k === "name" ||
                 k === "sku" ||
-                k ===
-                  "sellingPrice"
+                k === "sellingPrice"
               }
             />
           )
         )}
+
 
         <button
           type="submit"
@@ -147,11 +193,17 @@ function Products() {
 
       </form>
 
+
+      {/* PRODUCTS */}
+
       {isLoading ? (
+
         <p>
           Loading products...
         </p>
+
       ) : (
+
         <table>
 
           <thead>
@@ -162,6 +214,7 @@ function Products() {
               <th>Stock</th>
             </tr>
           </thead>
+
 
           <tbody>
 
@@ -190,7 +243,7 @@ function Products() {
                     ₦
                     {Number(
                       p.sellingPrice ||
-                        0
+                      0
                     ).toLocaleString()}
                   </td>
 
@@ -208,6 +261,7 @@ function Products() {
           </tbody>
 
         </table>
+
       )}
 
     </Layout>
