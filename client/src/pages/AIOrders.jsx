@@ -14,7 +14,7 @@ import Layout from "../components/Layout";
    AI ORDER APPROVAL
 ========================================================= */
 
-function AIOrders() {
+export default function AIOrders() {
   const {
     data: items = [],
     isLoading,
