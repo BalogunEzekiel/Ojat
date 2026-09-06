@@ -1,12 +1,21 @@
 import {
+  useState,
+} from "react";
+
+import {
   useQuery,
 } from "@tanstack/react-query";
+
+import api from "../lib/api";
+
+import Layout from "../components/Layout";
+
 
 /* =========================================================
    AI ORDER APPROVAL
 ========================================================= */
 
-function AIOrders() {
+export default function AIOrders() {
   const {
     data: items = [],
     isLoading,
@@ -35,24 +44,39 @@ function AIOrders() {
     staleTime: 15 * 1000,
   });
 
-  const [reason, setReason] =
-    useState({});
+
+  const [
+    reason,
+    setReason,
+  ] = useState({});
+
 
   const [
     errorMessage,
     setErrorMessage,
   ] = useState("");
 
+
   const [
     reviewing,
     setReviewing,
   ] = useState(null);
+
+
+  /* =======================================================
+     REVIEW PROPOSAL
+  ======================================================= */
 
   async function review(
     id,
     action
   ) {
     setErrorMessage("");
+
+
+    /* -----------------------------------------------------
+       REJECTION REASON
+    ----------------------------------------------------- */
 
     if (
       action === "reject" &&
@@ -61,14 +85,19 @@ function AIOrders() {
       setErrorMessage(
         "A rejection reason is required."
       );
+
       return;
     }
 
+
     setReviewing(id);
 
+
     try {
+
       await api.post(
         `/ai-orders/${id}/${action}`,
+
         action === "reject"
           ? {
               rejectionReason:
@@ -76,6 +105,11 @@ function AIOrders() {
             }
           : {}
       );
+
+
+      /* ---------------------------------------------------
+         REMOVE STORED REASON
+      --------------------------------------------------- */
 
       setReason((prev) => {
         const next = {
@@ -87,20 +121,34 @@ function AIOrders() {
         return next;
       });
 
+
+      /* ---------------------------------------------------
+         REFRESH QUEUE
+      --------------------------------------------------- */
+
       await refetch();
 
     } catch (e) {
+
       setErrorMessage(
         e.response?.data?.message ||
         "Review action failed"
       );
+
     } finally {
+
       setReviewing(null);
+
     }
   }
 
+
   return (
     <Layout>
+
+      {/* =================================================
+          PAGE HEADING
+      ================================================= */}
 
       <div className="page-heading">
 
@@ -121,20 +169,35 @@ function AIOrders() {
 
         </div>
 
+
         <strong className="queue-count">
           {items.length} pending
         </strong>
 
       </div>
 
+
+      {/* =================================================
+          ERROR
+      ================================================= */}
+
       {(errorMessage ||
         isError) && (
+
         <div className="error">
+
           {errorMessage ||
             error.response?.data?.message ||
             "Unable to load proposals"}
+
         </div>
+
       )}
+
+
+      {/* =================================================
+          LOADING
+      ================================================= */}
 
       {isLoading ? (
 
@@ -146,7 +209,12 @@ function AIOrders() {
 
         </div>
 
+
       ) : items.length === 0 ? (
+
+        /* ===============================================
+           EMPTY QUEUE
+        =============================================== */
 
         <div className="empty">
 
@@ -161,7 +229,12 @@ function AIOrders() {
 
         </div>
 
+
       ) : (
+
+        /* ===============================================
+           PROPOSAL LIST
+        =============================================== */
 
         <div className="proposal-list">
 
@@ -175,11 +248,13 @@ function AIOrders() {
               item.customer ||
               {};
 
+
             const aiConfidence =
               Number(
                 item.aiConfidence ||
                   0
               );
+
 
             const productConfidence =
               Number(
@@ -187,17 +262,24 @@ function AIOrders() {
                   0
               );
 
+
             const total =
               Number(
                 item.proposedTotal ||
                   0
               );
 
+
             return (
+
               <article
                 className="proposal"
                 key={item.id}
               >
+
+                {/* =====================================
+                    PROPOSAL HEADER
+                ===================================== */}
 
                 <div className="proposal-top">
 
@@ -208,29 +290,43 @@ function AIOrders() {
                         "PENDING"}
                     </span>
 
+
                     <h2>
                       {product.name ||
                         "Unmatched product"}
                     </h2>
 
+
                     <p className="muted">
+
                       {customer.name ||
                         "Customer"}
+
                       {" · "}
+
                       {customer.phone ||
                         "No phone"}
+
                     </p>
 
                   </div>
 
+
+                  {/* ===================================
+                      AI CONFIDENCE
+                  =================================== */}
+
                   <div className="confidence">
 
                     <strong>
+
                       {Math.round(
                         aiConfidence *
                           100
                       )}
+
                       %
+
                     </strong>
 
                     <span>
@@ -241,30 +337,49 @@ function AIOrders() {
 
                 </div>
 
+
+                {/* =====================================
+                    CUSTOMER MESSAGE
+                ===================================== */}
+
                 <blockquote>
+
                   “
                   {item.rawMessage ||
                     "No message available"}
                   ”
+
                 </blockquote>
+
+
+                {/* =====================================
+                    PROPOSAL FACTS
+                ===================================== */}
 
                 <div className="proposal-facts">
 
                   <div>
+
                     <span>
                       Product match
                     </span>
 
                     <strong>
+
                       {Math.round(
                         productConfidence *
                           100
                       )}
+
                       %
+
                     </strong>
+
                   </div>
 
+
                   <div>
+
                     <span>
                       Quantity
                     </span>
@@ -273,9 +388,12 @@ function AIOrders() {
                       {item.requestedQuantity ??
                         0}
                     </strong>
+
                   </div>
 
+
                   <div>
+
                     <span>
                       Inventory
                     </span>
@@ -284,20 +402,31 @@ function AIOrders() {
                       {item.availableInventory ??
                         0}
                     </strong>
+
                   </div>
 
+
                   <div>
+
                     <span>
                       Total
                     </span>
 
                     <strong>
+
                       ₦
                       {total.toLocaleString()}
+
                     </strong>
+
                   </div>
 
                 </div>
+
+
+                {/* =====================================
+                    REVIEW CONTROLS
+                ===================================== */}
 
                 <div className="review-controls">
 
@@ -306,66 +435,90 @@ function AIOrders() {
                       reason[item.id] ||
                       ""
                     }
+
                     onChange={(e) =>
                       setReason({
                         ...reason,
+
                         [item.id]:
                           e.target.value,
                       })
                     }
+
                     placeholder="Rejection reason (only needed to reject)"
+
                     disabled={
                       reviewing ===
                       item.id
                     }
                   />
 
+
+                  {/* =================================
+                      REJECT
+                  ================================= */}
+
                   <button
                     type="button"
                     className="reject"
+
                     onClick={() =>
                       review(
                         item.id,
                         "reject"
                       )
                     }
+
                     disabled={
                       reviewing ===
                       item.id
                     }
                   >
+
                     {reviewing ===
                     item.id
                       ? "Processing..."
                       : "Reject"}
+
                   </button>
+
+
+                  {/* =================================
+                      APPROVE
+                  ================================= */}
 
                   <button
                     type="button"
+
                     onClick={() =>
                       review(
                         item.id,
                         "approve"
                       )
                     }
+
                     disabled={
                       reviewing ===
                       item.id
                     }
                   >
+
                     {reviewing ===
                     item.id
                       ? "Processing..."
                       : "Approve"}
+
                   </button>
 
                 </div>
 
               </article>
+
             );
           })}
 
         </div>
+
       )}
 
     </Layout>
