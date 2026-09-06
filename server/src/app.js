@@ -13,6 +13,7 @@ import {
   errorHandler,
 } from "./middleware/error.js";
 
+import businessRoutes from "./routes/business.routes.js";
 
 const app =
   express();
@@ -49,11 +50,24 @@ app.use(
 );
 
 
+
 /* =========================================================
    JSON BODY PARSER
 
-   rawBody is required for Paystack webhook signature
-   verification.
+   Preserve the ORIGINAL raw request body.
+   
+   This is required for cryptographic webhook 
+   signature verification because Meta and Paystack 
+   sign the exact bytes received over HTTP.
+   
+   IMPORTANT:
+   Webhook signature middleware must use:
+
+        req.rawBody 
+   
+   and NOT: 
+   
+        JSON.stringify(req.body)
 ========================================================= */
 
 app.use(
@@ -101,6 +115,11 @@ app.get(
 /* =========================================================
    API ROUTES
 ========================================================= */
+
+app.use(
+  "/api/v1/businesses",
+  businessRoutes
+);
 
 app.use(
   "/api/v1",
