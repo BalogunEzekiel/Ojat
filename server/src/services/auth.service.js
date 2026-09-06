@@ -140,6 +140,7 @@ export async function register(input) {
   );
 
 }
+
 export async function login(email, password) {
   const user = await prisma.user.findUnique({
     where: {
@@ -151,20 +152,55 @@ export async function login(email, password) {
     !user ||
     !(await bcrypt.compare(password, user.passwordHash))
   ) {
-    throw Object.assign(new Error("Invalid credentials"), {
-      status: 401,
-    });
+    throw Object.assign(
+      new Error("Invalid credentials"),
+      {
+        status: 401,
+      }
+    );
   }
 
-  const membership = await prisma.businessMember.findFirst({
-    where: {
-      userId: user.id,
-    },
-  });
+  const membership =
+    await prisma.businessMember.findFirst({
+      where: {
+        userId: user.id,
+      },
+
+      include: {
+        business: true,
+      },
+
+      orderBy: {
+        business: {
+          createdAt: "asc",
+        },
+      },
+    });
+
+
+  // ==========================================
+  // Ensure user belongs to a business
+  // ==========================================
+
+  if (!membership) {
+    throw Object.assign(
+      new Error(
+        "No business account is associated with this user"
+      ),
+      {
+        status: 403,
+      }
+    );
+  }
+
+
+  // ==========================================
+  // Generate authentication tokens
+  // ==========================================
 
   return tokens(
     user,
-    membership?.businessId
+    membership.businessId
   );
 }
 
