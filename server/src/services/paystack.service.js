@@ -12,6 +12,9 @@ import {
   env,
 } from "../config/env.js";
 
+import {
+  queueWhatsAppOutbound,
+} from "../queues/whatsapp.queue.js";
 
 /* =========================================================
    PAYSTACK API
@@ -872,32 +875,26 @@ export async function finalizeSuccessfulPayment(
 export async function handlePaystackSuccess(
   reference
 ) {
-
   const transaction =
     await verifyPaystackTransaction(
       reference
     );
-
-
-  return finalizeSuccessfulPayment(
-    reference,
-    transaction
-  );
-}
-
-/* =========================================================
-   CUSTOMER PAYMENT CONFIRMATION
-========================================================= */
-
-export async function handlePaystackSuccess(reference) {
-  const transaction =
-    await verifyPaystackTransaction(reference);
 
   const result =
     await finalizeSuccessfulPayment(
       reference,
       transaction
     );
+
+
+  /*
+   * If the payment was already finalized,
+   * do not send the WhatsApp confirmation again.
+   *
+   * The payment ID is also used as the outbound
+   * idempotency key, providing a second layer of
+   * duplicate protection.
+   */
 
   if (
     result.alreadyProcessed ||
@@ -906,22 +903,71 @@ export async function handlePaystackSuccess(reference) {
     return result;
   }
 
+
   const order =
     result.order;
+
+
+  /*
+   * Find the customer's most recently updated
+   * conversation for this business.
+   */
 
   const conversation =
     await prisma.conversation.findFirst({
       where: {
-        businessId: order.businessId,
-        customerId: order.customerId,
+        businessId:
+          order.businessId,
+
+        customerId:
+          order.customerId,
       },
 
       orderBy: {
-        updatedAt: "desc",
+        updatedAt:
+          "desc",
       },
     });
 
-  if (conversation && order.customer?.phone) {
+
+  /*
+   * Payment has already been finalized successfully.
+   *
+   * Failure to locate a conversation should NOT
+   * roll back the payment. The financial transaction
+   * is already complete.
+   */
+
+  if (
+    !conversation
+  ) {
+    console.warn(
+      `Payment ${reference} finalized, but no WhatsApp conversation was found for order ${order.number}`
+    );
+
+    return result;
+  }
+
+
+  if (
+    !order.customer?.phone
+  ) {
+    console.warn(
+      `Payment ${reference} finalized, but customer has no WhatsApp phone for order ${order.number}`
+    );
+
+    return result;
+  }
+
+
+  const message =
+    `Payment received successfully for order ${order.number}. ` +
+    `Your order is now being processed. ` +
+    `Thank you for shopping with us!`;
+
+
+  try {
+
     await queueWhatsAppOutbound({
       businessId:
         order.businessId,
@@ -932,24 +978,55 @@ export async function handlePaystackSuccess(reference) {
       to:
         order.customer.phone,
 
-      message:
-        `Payment received successfully for order ${order.number}. ` +
-        `Your order is now being processed. Thank you for shopping with us!`,
+      message,
 
       idempotencyKey:
         `payment-success-${result.payment.id}`,
 
       context: {
-        type: "PAYMENT_SUCCESS",
+        type:
+          "PAYMENT_SUCCESS",
 
         orderId:
           order.id,
 
+        orderNumber:
+          order.number,
+
         paymentId:
           result.payment.id,
+
+        reference:
+          result.payment.reference,
       },
     });
+
+
+    console.log(
+      `Payment success WhatsApp notification queued for order ${order.number}`
+    );
+
+  } catch (error) {
+
+    /*
+     * Do NOT throw here.
+     *
+     * The payment has already been successfully
+     * finalized. Throwing would make the Paystack
+     * webhook look unsuccessful even though the
+     * financial transaction is complete.
+     *
+     * The notification can be retried separately
+     * using the payment-success idempotency key.
+     */
+
+    console.error(
+      `Failed to queue payment success WhatsApp notification for order ${order.number}:`,
+      error
+    );
+
   }
+
 
   return result;
 }
