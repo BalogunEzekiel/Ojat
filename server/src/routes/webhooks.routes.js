@@ -24,7 +24,7 @@ import {
 
 import {
   handlePaystackSuccess,
-} from "../services/payment.service.js";
+} from "../services/paystack.service.js";
 
 import {
   normalizePhone,
