@@ -428,8 +428,25 @@ export async function processCommerceMessage({
   messageId,
   conversationId,
 }) {
+
+  /*
+   * Commerce processing is always tenant-scoped.
+   *
+   * Unlike the platform AI Extractor sandbox,
+   * this function creates business-owned records,
+   * matches products, creates orders and can trigger
+   * WhatsApp/payment workflows.
+   */
+  if (!businessId) {
+    throw new Error(
+      "businessId is required for commerce message processing"
+    );
+  }
+
+
   const extraction =
     await extractCommerce(message);
+
 
   await prisma.aIExtraction.create({
     data: {
