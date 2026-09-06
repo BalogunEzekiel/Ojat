@@ -360,22 +360,24 @@ async function sendApprovalMessage({
 ========================================================= */
 
 export async function listPendingProposals(
-  businessId
+  businessId,
+  isPlatformAdmin = false
 ) {
   return prisma.aIOrderProposal.findMany({
     where: {
-      businessId,
+      ...(isPlatformAdmin
+        ? {}
+        : {
+            businessId,
+          }),
 
-      status:
-        "PENDING",
+      status: "PENDING",
     },
 
-    include:
-      proposalInclude,
+    include: proposalInclude,
 
     orderBy: {
-      createdAt:
-        "asc",
+      createdAt: "asc",
     },
   });
 }
