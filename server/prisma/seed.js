@@ -1,86 +1,43 @@
-import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import { PrismaClient, UserRole } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-const hash = await bcrypt.hash('ChangeMe123!', 10);
+async function main() {
+  const passwordHash = await bcrypt.hash(
+    "ChangeMe123!",
+    12
+  );
 
-const user = await prisma.user.upsert({
-  where: {
-    email: 'admin@ojat.local',
-  },
-  update: {
-    passwordHash: hash,
-  },
-  create: {
-    email: 'admin@ojat.local',
-    passwordHash: hash,
-    firstName: 'Platform',
-    lastName: 'Admin',
-    role: 'PLATFORM_ADMIN',
-  },
-});
-
-const business = await prisma.business.upsert({
-  where: {
-    slug: 'demo-fashion-store',
-  },
-  update: {},
-  create: {
-    name: 'Demo Fashion Store',
-    slug: 'demo-fashion-store',
-  },
-});
-
-await prisma.businessMember.upsert({
-  where: {
-    businessId_userId: {
-      businessId: business.id,
-      userId: user.id,
+  const admin = await prisma.user.upsert({
+    where: {
+      email: "admin@ojat.local",
     },
-  },
-  update: {},
-  create: {
-    businessId: business.id,
-    userId: user.id,
-    role: 'BUSINESS_OWNER',
-  },
-});
-
-const p = await prisma.product.upsert({
-  where: {
-    businessId_sku: {
-      businessId: business.id,
-      sku: 'RED-SHOE-42',
+    update: {
+      passwordHash,
+      role: UserRole.PLATFORM_ADMIN,
+      firstName: "Ojat",
+      lastName: "Admin",
     },
-  },
-  update: {},
-  create: {
-    businessId: business.id,
-    name: 'Red Shoe',
-    sku: 'RED-SHOE-42',
-    sellingPrice: 42500,
-    minStock: 3,
-  },
-});
+    create: {
+      email: "admin@ojat.local",
+      passwordHash,
+      firstName: "Ojat",
+      lastName: "Admin",
+      role: UserRole.PLATFORM_ADMIN,
+    },
+  });
 
-await prisma.inventory.upsert({
-  where: {
-    productId: p.id,
-  },
-  update: {
-    quantity: 10,
-  },
-  create: {
-    businessId: business.id,
-    productId: p.id,
-    quantity: 10,
-  },
-});
+  console.log(
+    `Platform admin ready: ${admin.email}`
+  );
+}
 
-console.log(
-  'Seed complete. Login: admin@ojat.local / ChangeMe123!'
-);
-
-await prisma.$disconnect();
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
