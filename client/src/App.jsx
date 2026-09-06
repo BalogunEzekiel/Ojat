@@ -342,6 +342,27 @@ function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] =
     useState(false);
 
+
+  /* =======================================================
+     CURRENT USER
+  ======================================================= */
+
+  const user = JSON.parse(
+    localStorage.getItem("user") || "null"
+  );
+
+  const isPlatformAdmin =
+    user?.role === "PLATFORM_ADMIN";
+
+
+  /* =======================================================
+     CURRENT BUSINESS
+     
+     Platform admins do not necessarily belong to a
+     business, so do not request /businesses/current
+     for them.
+  ======================================================= */
+
   const {
     data: business,
   } = useQuery({
@@ -356,8 +377,17 @@ function Layout({ children }) {
       return response.data.data;
     },
 
-    staleTime: 60 * 1000,
+    enabled:
+      !isPlatformAdmin,
+
+    staleTime:
+      60 * 1000,
   });
+
+
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
 
   function logout() {
     clearSession();
@@ -369,9 +399,15 @@ function Layout({ children }) {
     });
   }
 
+
+  /* =======================================================
+     CLOSE SIDEBAR
+  ======================================================= */
+
   function closeSidebar() {
     setSidebarOpen(false);
   }
+
 
   return (
     <div className="layout">
@@ -406,6 +442,7 @@ function Layout({ children }) {
 
       </header>
 
+
       {/* MOBILE OVERLAY */}
 
       {sidebarOpen && (
@@ -416,6 +453,7 @@ function Layout({ children }) {
           aria-label="Close navigation"
         />
       )}
+
 
       {/* SIDEBAR */}
 
@@ -432,6 +470,7 @@ function Layout({ children }) {
           <div className="sidebar-brand">
 
             <div>
+
               <h2>Ojat</h2>
 
               {business?.name && (
@@ -439,6 +478,7 @@ function Layout({ children }) {
                   {business.name}
                 </small>
               )}
+
             </div>
 
             <button
@@ -451,6 +491,7 @@ function Layout({ children }) {
             </button>
 
           </div>
+
 
           <nav className="sidebar-nav">
 
@@ -486,6 +527,9 @@ function Layout({ children }) {
 
         </div>
 
+
+        {/* LOGOUT */}
+
         <button
           type="button"
           className="sidebar-logout"
@@ -495,6 +539,7 @@ function Layout({ children }) {
         </button>
 
       </aside>
+
 
       {/* PAGE CONTENT */}
 
@@ -511,6 +556,23 @@ function Layout({ children }) {
 ========================================================= */
 
 function Dashboard() {
+
+  /* =======================================================
+     CURRENT USER
+  ======================================================= */
+
+  const user = JSON.parse(
+    localStorage.getItem("user") || "null"
+  );
+
+  const isPlatformAdmin =
+    user?.role === "PLATFORM_ADMIN";
+
+
+  /* =======================================================
+     DASHBOARD DATA
+  ======================================================= */
+
   const {
     data: d,
     isLoading,
@@ -526,15 +588,28 @@ function Dashboard() {
       return response.data.data;
     },
 
-    staleTime: 30 * 1000,
+    staleTime:
+      30 * 1000,
   });
+
 
   return (
     <Layout>
 
+      {/* ===================================================
+          DASHBOARD TITLE
+      =================================================== */}
+
       <h1>
-        Business Dashboard
+        {isPlatformAdmin
+          ? "Platform Admin Dashboard"
+          : "Business Dashboard"}
       </h1>
+
+
+      {/* ===================================================
+          ERROR
+      =================================================== */}
 
       {isError && (
         <div className="error">
@@ -543,11 +618,21 @@ function Dashboard() {
         </div>
       )}
 
+
+      {/* ===================================================
+          LOADING
+      =================================================== */}
+
       {isLoading && (
         <p>
           Loading...
         </p>
       )}
+
+
+      {/* ===================================================
+          DASHBOARD DATA
+      =================================================== */}
 
       {d && (
         <div className="grid">
@@ -555,6 +640,7 @@ function Dashboard() {
           {Object.entries(d).map(
             ([k, v]) => (
               <article key={k}>
+
                 <span>
                   {k}
                 </span>
@@ -562,6 +648,7 @@ function Dashboard() {
                 <strong>
                   {String(v)}
                 </strong>
+
               </article>
             )
           )}
