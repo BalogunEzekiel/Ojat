@@ -221,109 +221,254 @@ async function processOutbound(job) {
     );
   }
 
-  /*
-    We currently use the existing Message model.
+  if (!to) {
+    throw new Error(
+      "Outbound message has no recipient"
+    );
+  }
 
-    The provider message ID is saved after Meta accepts the
-    message. This gives us conversation history even though
-    the schema does not yet contain a dedicated outbox table.
-  */
+  if (!message) {
+    throw new Error(
+      "Outbound message has no message body"
+    );
+  }
+
+  if (!idempotencyKey) {
+    throw new Error(
+      "Outbound message has no idempotencyKey"
+    );
+  }
+
+
+  /* =======================================================
+     FIND EXISTING OUTBOUND MESSAGE
+  ======================================================= */
 
   const existing =
-    await prisma.message.findFirst({
+    await prisma.message.findUnique({
       where: {
-        conversationId,
-
-        direction: "OUTBOUND",
-
-        content: message,
-      },
-
-      orderBy: {
-        createdAt: "desc",
+        idempotencyKey,
       },
     });
 
-  /*
-    This protects against a retry after the outbound message
-    was already persisted.
 
-    The queue's deterministic job ID provides the first layer
-    of idempotency; this is a second defensive layer.
-  */
+  /*
+   * If this idempotency key has already been successfully
+   * sent, do not send it to Meta again.
+   */
 
   if (
-    existing?.rawPayload &&
-    typeof existing.rawPayload === "object" &&
-    existing.rawPayload.idempotencyKey === idempotencyKey
+    existing &&
+    existing.status !== "FAILED"
   ) {
     return {
       skipped: true,
-      reason: "Outbound message already persisted",
-      messageId: existing.id,
+      reason:
+        "Outbound message already exists",
+      messageId:
+        existing.id,
+      status:
+        existing.status,
+      externalId:
+        existing.externalId,
     };
   }
 
 
-  const response =
-    await sendWhatsAppText({
-      to,
-      message,
+  /* =======================================================
+     CREATE OR RESET OUTBOUND MESSAGE
+  ======================================================= */
+
+  let outboundMessage;
+
+  if (existing) {
+
+    /*
+     * A previous attempt failed.
+     *
+     * Reuse the same database record so the retry does not
+     * create multiple Message records for one logical
+     * outbound message.
+     */
+
+    outboundMessage =
+      await prisma.message.update({
+        where: {
+          id: existing.id,
+        },
+
+        data: {
+          status: "PENDING",
+          errorMessage: null,
+        },
+      });
+
+  } else {
+
+    outboundMessage =
+      await prisma.message.create({
+        data: {
+          conversationId,
+
+          direction:
+            "OUTBOUND",
+
+          type:
+            "TEXT",
+
+          content:
+            message,
+
+          status:
+            "PENDING",
+
+          idempotencyKey,
+
+          rawPayload: {
+            provider:
+              "META_WHATSAPP",
+
+            context,
+          },
+        },
+      });
+
+  }
+
+
+  /* =======================================================
+     SEND TO META
+  ======================================================= */
+
+  try {
+
+    const response =
+      await sendWhatsAppText({
+        to,
+        message,
+      });
+
+
+    const providerMessageId =
+      response?.messages?.[0]?.id ||
+      null;
+
+
+    /* =====================================================
+       MARK SENT
+    ===================================================== */
+
+    outboundMessage =
+      await prisma.message.update({
+        where: {
+          id:
+            outboundMessage.id,
+        },
+
+        data: {
+          status:
+            "SENT",
+
+          externalId:
+            providerMessageId,
+
+          errorMessage:
+            null,
+
+          rawPayload: {
+            provider:
+              "META_WHATSAPP",
+
+            response,
+
+            context,
+
+            idempotencyKey,
+          },
+        },
+      });
+
+
+    /* =====================================================
+       UPDATE CONVERSATION
+    ===================================================== */
+
+    await prisma.conversation.update({
+      where: {
+        id: conversationId,
+      },
+
+      data: {
+        updatedAt:
+          new Date(),
+      },
     });
 
 
-  const providerMessageId =
-    response?.messages?.[0]?.id ||
-    null;
+    return {
+      success: true,
+
+      messageId:
+        outboundMessage.id,
+
+      providerMessageId,
+
+      status:
+        outboundMessage.status,
+    };
 
 
-  const outboundMessage =
-    await prisma.message.create({
+  } catch (error) {
+
+    /* =====================================================
+       MARK FAILED
+    ===================================================== */
+
+    const errorMessage =
+      error?.response?.data
+        ? JSON.stringify(
+            error.response.data
+          )
+        : error?.message ||
+          "WhatsApp delivery failed";
+
+
+    await prisma.message.update({
+      where: {
+        id:
+          outboundMessage.id,
+      },
+
       data: {
-        conversationId,
+        status:
+          "FAILED",
 
-        direction: "OUTBOUND",
-
-        type: "TEXT",
-
-        content: message,
-
-        externalId:
-          providerMessageId,
+        errorMessage:
+          errorMessage,
 
         rawPayload: {
-          idempotencyKey,
-
           provider:
             "META_WHATSAPP",
 
-          response,
-
           context,
+
+          idempotencyKey,
+
+          deliveryError:
+            error?.response?.data ||
+            error?.message ||
+            "Unknown WhatsApp delivery error",
         },
       },
     });
 
 
-  await prisma.conversation.update({
-    where: {
-      id: conversationId,
-    },
+    /*
+     * Re-throw so BullMQ performs its configured retry.
+     */
 
-    data: {
-      updatedAt: new Date(),
-    },
-  });
-
-
-  return {
-    success: true,
-
-    messageId:
-      outboundMessage.id,
-
-    providerMessageId,
-  };
+    throw error;
+  }
 }
 
 
