@@ -160,6 +160,22 @@ export async function login(email, password) {
     );
   }
 
+  /*
+   * PLATFORM ADMIN
+   *
+   * Platform admins are not required to belong
+   * to a business.
+   */
+  if (user.role === "PLATFORM_ADMIN") {
+    return tokens(user, null);
+  }
+
+  /*
+   * BUSINESS USER
+   *
+   * Every non-platform user must belong to
+   * a business.
+   */
   const membership =
     await prisma.businessMember.findFirst({
       where: {
@@ -177,11 +193,6 @@ export async function login(email, password) {
       },
     });
 
-
-  // ==========================================
-  // Ensure user belongs to a business
-  // ==========================================
-
   if (!membership) {
     throw Object.assign(
       new Error(
@@ -193,11 +204,9 @@ export async function login(email, password) {
     );
   }
 
-
-  // ==========================================
-  // Generate authentication tokens
-  // ==========================================
-
+  /*
+   * Generate authentication tokens
+   */
   return tokens(
     user,
     membership.businessId
