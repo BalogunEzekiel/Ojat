@@ -56,8 +56,57 @@ r.post(
         );
 
 
+      /*
+       * PLATFORM ADMIN SANDBOX
+       *
+       * Platform admins do not have a businessId.
+       * The AI Extractor can still be used as a
+       * testing/playground tool, but there is no
+       * tenant-owned AIExtraction record to persist.
+       */
+      if (
+        req.user.role ===
+        "PLATFORM_ADMIN"
+      ) {
+
+        return ok(
+          res,
+          {
+            ...result,
+
+            meta: {
+              persisted: false,
+              mode:
+                "PLATFORM_SANDBOX",
+            },
+          }
+        );
+
+      }
+
+
+      /*
+       * BUSINESS USER
+       *
+       * A business context is mandatory when
+       * persisting an AI extraction.
+       */
+      if (
+        !req.user.businessId
+      ) {
+
+        return res.status(403).json({
+          success: false,
+          message:
+            "Business context is required for AI extraction",
+        });
+
+      }
+
+
       await prisma.aIExtraction.create({
         data: {
+
           businessId:
             req.user.businessId,
 
@@ -76,9 +125,17 @@ r.post(
       });
 
 
-      ok(
+      return ok(
         res,
-        result
+        {
+          ...result,
+
+          meta: {
+            persisted: true,
+            mode:
+              "BUSINESS",
+          },
+        }
       );
 
     } catch (error) {
@@ -101,6 +158,39 @@ r.post(
   async (req, res, next) => {
 
     try {
+
+      /*
+       * Platform admins cannot process an order
+       * without a business context.
+       *
+       * This endpoint creates tenant-owned commerce
+       * records and therefore must never operate with
+       * businessId = null.
+       */
+      if (
+        req.user.role ===
+        "PLATFORM_ADMIN"
+      ) {
+
+        return res.status(403).json({
+          success: false,
+          message:
+            "A business account is required to process an order",
+        });
+
+      }
+
+
+      if (!req.user.businessId) {
+
+        return res.status(403).json({
+          success: false,
+          message:
+            "Business context is required to process an order",
+        });
+
+      }
+
 
       const bodySchema =
         z.object({
@@ -140,6 +230,7 @@ r.post(
 
       const result =
         await processCommerceMessage({
+
           businessId:
             req.user.businessId,
 
@@ -148,10 +239,11 @@ r.post(
 
           customer:
             data.customer,
+
         });
 
 
-      ok(
+      return ok(
         res,
         result
       );
