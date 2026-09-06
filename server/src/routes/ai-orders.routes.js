@@ -14,7 +14,20 @@ const r = Router();
 r.use(authenticate);
 
 r.get("/pending", async (req, res, next) => {
-  try { ok(res, await listPendingProposals(req.user.businessId)); } catch (error) { next(error); }
+  try {
+    const isPlatformAdmin =
+      req.user.role === "PLATFORM_ADMIN";
+
+    ok(
+      res,
+      await listPendingProposals(
+        req.user.businessId,
+        isPlatformAdmin
+      )
+    );
+  } catch (error) {
+    next(error);
+  }
 });
 
 r.get("/:id", async (req, res, next) => {
