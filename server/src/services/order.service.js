@@ -295,7 +295,7 @@ export async function createProposedOrder({
     });
 
 
-  const proposal = await prisma.aiOrderProposal.create({
+  const proposal = await prisma.aIOrderProposal.create({
     data: {
       businessId,
       customerId: resolvedCustomer.id,
