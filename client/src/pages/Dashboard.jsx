@@ -126,6 +126,6 @@ function Dashboard() {
 
     </Layout>
   );
-}
+}}
 
 
