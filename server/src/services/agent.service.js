@@ -53,7 +53,20 @@ async function sendConversationMessage({
   message,
   idempotencyKey,
   context = {},
+  channel = "WHATSAPP",
 }) {
+  /*
+   * SANDBOX messages are returned to the caller/UI
+   * but are NEVER sent to WhatsApp.
+   */
+  if (channel === "SANDBOX") {
+    return {
+      sandbox: true,
+      sent: false,
+      message,
+    };
+  }
+
   if (!customer?.phone) {
     return null;
   }
@@ -106,6 +119,7 @@ async function handleProductInquiry({
   customer,
   conversationId,
   executionId,
+  channel,
 }) {
   if (!extraction.productQuery) {
     return finishExecution({
@@ -154,6 +168,7 @@ async function handleProductInquiry({
       message,
       idempotencyKey:
         `inquiry-${conversationId}-${executionId}`,
+      channel,
     });
 
     return finishExecution({
@@ -181,6 +196,7 @@ async function handleProductInquiry({
       message,
       idempotencyKey:
         `inquiry-${conversationId}-${executionId}`,
+      channel,
     });
 
     return finishExecution({
@@ -247,6 +263,7 @@ async function handleStockInquiry({
   customer,
   conversationId,
   executionId,
+  channel,
 }) {
   if (!extraction.productQuery) {
     const message =
@@ -259,6 +276,7 @@ async function handleStockInquiry({
       message,
       idempotencyKey:
         `stock-${conversationId}-${executionId}`,
+      channel,
     });
 
     return finishExecution({
@@ -291,6 +309,7 @@ async function handleStockInquiry({
       message,
       idempotencyKey:
         `stock-${conversationId}-${executionId}`,
+      channel,
     });
 
     return finishExecution({
@@ -325,6 +344,7 @@ async function handleStockInquiry({
     message,
     idempotencyKey:
       `stock-${conversationId}-${executionId}`,
+    channel,
   });
 
   return finishExecution({
@@ -353,6 +373,7 @@ async function handleGreeting({
   conversationId,
   executionId,
   extraction,
+  channel,
 }) {
   const message =
     "Hello! 👋 Welcome to Ojat. How can I help you today? You can ask about a product, check stock, or place an order.";
@@ -364,6 +385,7 @@ async function handleGreeting({
     message,
     idempotencyKey:
       `greeting-${conversationId}-${executionId}`,
+    channel,
   });
 
   return finishExecution({
@@ -390,6 +412,7 @@ async function handleUnknown({
   conversationId,
   executionId,
   extraction,
+  channel,
 }) {
   const message =
     "I'm sorry, I didn't quite understand that. You can ask me about a product, check availability, or tell me what you'd like to order.";
@@ -401,6 +424,7 @@ async function handleUnknown({
     message,
     idempotencyKey:
       `unknown-${conversationId}-${executionId}`,
+    channel,
   });
 
   return finishExecution({
@@ -427,6 +451,7 @@ export async function processCommerceMessage({
   customer,
   messageId,
   conversationId,
+  channel = "WHATSAPP",
 }) {
 
   /*
@@ -482,6 +507,7 @@ export async function processCommerceMessage({
         input: {
           message,
           customer,
+          channel,
         },
 
         output: {
@@ -504,6 +530,7 @@ export async function processCommerceMessage({
         customer,
         conversationId,
         executionId: execution.id,
+        channel,
       });
 
 
@@ -514,6 +541,7 @@ export async function processCommerceMessage({
         customer,
         conversationId,
         executionId: execution.id,
+        channel,
       });
 
 
@@ -524,6 +552,7 @@ export async function processCommerceMessage({
         conversationId,
         executionId: execution.id,
         extraction,
+        channel,
       });
 
 
@@ -538,6 +567,7 @@ export async function processCommerceMessage({
         conversationId,
         executionId: execution.id,
         extraction,
+        channel,
       });
   }
 
@@ -565,6 +595,7 @@ export async function processCommerceMessage({
       message: result.message,
       idempotencyKey:
         `order-product-${conversationId}-${execution.id}`,
+      channel,
     });
 
     return finishExecution({
@@ -595,6 +626,7 @@ export async function processCommerceMessage({
       message,
       idempotencyKey:
         `order-ambiguous-${conversationId}-${execution.id}`,
+      channel,
     });
 
     return finishExecution({
@@ -624,6 +656,7 @@ export async function processCommerceMessage({
       message,
       idempotencyKey:
         `order-not-found-${conversationId}-${execution.id}`,
+      channel,
     });
 
     return finishExecution({
@@ -660,6 +693,7 @@ export async function processCommerceMessage({
       message,
       idempotencyKey:
         `order-quantity-${conversationId}-${execution.id}`,
+      channel,
     });
 
     return finishExecution({
@@ -815,6 +849,7 @@ export async function processCommerceMessage({
 
       idempotencyKey:
         `order-proposal-${proposal.proposal.id}`,
+      channel,
     });
   }
 
