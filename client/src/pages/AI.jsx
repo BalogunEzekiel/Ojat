@@ -613,7 +613,7 @@ export default function AI() {
                       <strong>
                         ₦
                         {Number(
-                          product.sellingPrice ||
+                          product.Price ||
                           0
                         ).toLocaleString()}
                       </strong>
