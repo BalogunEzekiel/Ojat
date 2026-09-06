@@ -315,11 +315,7 @@ model Message {
   // Store failure reason when delivery/processing fails
   errorMessage   String?
 
-  conversation Conversation @relation(
-    fields: [conversationId],
-    references: [id],
-    onDelete: Cascade
-  )
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
