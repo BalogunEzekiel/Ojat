@@ -789,6 +789,9 @@ export async function extractWhatsAppCommerce(
         extracted:
           extraction,
 
+        model:
+          process.env.GROQ_MODEL_NAME,
+
       },
 
     });
