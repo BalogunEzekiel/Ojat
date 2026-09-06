@@ -227,21 +227,12 @@ r.post(
           req.body
         );
 
-
-      const result =
-        await processCommerceMessage({
-
-          businessId:
-            req.user.businessId,
-
-          message:
-            data.message,
-
-          customer:
-            data.customer,
-
-        });
-
+      const result = await processCommerceMessage({
+        businessId: req.user.businessId,
+        message,
+        customer,
+        channel: "SANDBOX",
+      });
 
       return ok(
         res,
