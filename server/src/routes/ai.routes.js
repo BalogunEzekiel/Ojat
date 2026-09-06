@@ -138,12 +138,21 @@ r.post(
         }
       );
 
-    } catch (error) {
+      } catch (error) {
+        console.error(
+          "AI PROCESS ORDER ERROR:",
+          error
+        );
+
+        next(error);
+      }
+
+/*    } catch (error) {
 
       next(error);
 
     }
-
+*/
   }
 );
 
