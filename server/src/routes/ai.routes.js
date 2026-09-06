@@ -236,6 +236,13 @@ r.post(
           req.body
         );
 
+      console.log("AI PROCESS ORDER REQUEST", {
+        businessId: req.user.businessId,
+        message: data.message,
+        customer: data.customer,
+        channel: "SANDBOX",
+      });
+
       const result = await processCommerceMessage({
         businessId: req.user.businessId,
         message: data.message,
