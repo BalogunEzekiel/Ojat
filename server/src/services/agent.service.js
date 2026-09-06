@@ -234,6 +234,7 @@ async function handleProductInquiry({
     message,
     idempotencyKey:
       `inquiry-${conversationId}-${executionId}`,
+    channel,
   });
 
   return finishExecution({
