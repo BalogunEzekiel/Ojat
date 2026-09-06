@@ -11,7 +11,7 @@ import {
 } from "../lib/response.js";
 
 import {
-  requireAuth,
+  authenticate,
 } from "../middleware/auth.js";
 
 import {
@@ -78,10 +78,7 @@ const updateBusinessSchema =
    ALL BUSINESS ROUTES REQUIRE AUTHENTICATION
 ========================================================= */
 
-r.use(
-  requireAuth
-);
-
+r.use(authenticate);
 
 /* =========================================================
    LIST MY BUSINESSES
